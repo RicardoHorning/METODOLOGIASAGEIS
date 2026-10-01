@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operação Resgate de Estoque - Desafio do Gestor Logístico</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              800: '#0c4a6e',
+              900: '#0f172a',
+            },
+            logistics: {
+              amber: '#f59e0b',
+              green: '#10b981',
+              blue: '#3b82f6',
+              purple: '#8b5cf6',
+              slate: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+
+    /* Print styles for printing certificate / report */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-card {
+        border: 2px solid #000 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #000 !important;
+      }
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Smooth step transitions */
+    .step-content {
+      transition: all 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
+
+  <!-- HEADER / NAVBAR -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 no-print">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+          <i class="fa-solid me-0 fa-boxes-packing text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-white leading-tight">Operação Resgate de Estoque</h1>
+          <p class="text-xs text-slate-400">Desafio Prático do Gestor Logístico • Cebrac</p>
+        </div>
+      </div>
+      
+      <div id="studentBadgeHeader" class="hidden items-center gap-3 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+        <i class="fa-solid fa-user-gear text-amber-400 text-sm"></i>
+        <div class="text-xs text-right">
+          <span id="headerStudentName" class="font-semibold text-white block">Aluno</span>
+          <span id="headerStudentDob" class="text-slate-400 block text-[10px]">--/--/----</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+
+    <!-- Custom Toast / Modal Box (Replaces alerts) -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-md bg-slate-800 border border-slate-700 text-white p-4 rounded-xl shadow-2xl flex items-center gap-3 pointer-events-none">
+      <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-info text-white"></i>
+      </div>
+      <div class="text-sm" id="toastMessage">Mensagem de notificação</div>
+    </div>
+
+    <!-- STEP 0: CADASTRO INICIAL DO ALUNO -->
+    <section id="stepRegistration" class="step-content max-w-lg mx-auto py-8">
+      <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl border border-slate-700/60">
+        <div class="text-center mb-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-500/10 text-sky-400 mb-3 border border-sky-500/20">
+            <i class="fa-solid fa-id-card text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white">Identificação do Aluno</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">Digite seu nome e nascimento para gerar seu desafio individual exclusivo.</p>
+        </div>
+
+        <form id="registrationForm" onsubmit="handleRegistration(event)" class="space-y-5">
+          <!-- Campo 1: Nome Completo -->
+          <div>
+            <label for="inputName" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+              <i class="fa-solid fa-user me-1 text-sky-400"></i> Nome Completo do Aluno
+            </label>
+            <input 
+              type="text" 
+              id="inputName" 
+              required 
+              placeholder="Ex: Carlos Eduardo da Silva"
+              class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all text-sm font-medium"
+            />
+          </div>
+
+          <!-- Campo 2: Data de Nascimento com Máscara DD/MM/AAAA -->
+          <div>
+            <label for="inputDob" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+              <i class="fa-solid fa-calendar-days me-1 text-sky-400"></i> Data de Nascimento
+            </label>
+            <input 
+              type="text" 
+              id="inputDob" 
+              required 
+              maxlength="10"
+              placeholder="DD/MM/AAAA (Apenas números)"
+              oninput="maskDate(this)"
+              class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all text-sm font-medium tracking-widest font-mono"
+            />
+            <span class="text-[11px] text-slate-400 mt-1 block">Digite somente os números. As barras ( / ) aparecem automaticamente.</span>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-sky-500/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base mt-2"
+          >
+            <i class="fa-solid fa-play"></i>
+            Iniciar Desafio Logístico
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- STEP CONTAINER FOR PHASES (HIDDEN INITIALLY) -->
+    <div id="gameContainer" class="hidden space-y-6">
+
+      <!-- TOP PROGRESS BAR & PHASE INDICATORS -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5 no-print border border-slate-700/60">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <span class="text-xs font-semibold uppercase text-amber-400 tracking-wider">Missão Atual</span>
+            <h2 id="phaseTitle" class="text-lg sm:text-xl font-bold text-white">Fase 1: Curva ABC de Estoque</h2>
+          </div>
+          
+          <!-- KPI Indicator Bar -->
+          <div class="flex items-center gap-3">
+            <div class="bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-sky-400 text-xs"></i>
+              <span class="text-xs text-slate-400">Semente Prova:</span>
+              <span id="seedBadge" class="text-xs font-mono font-bold text-amber-400">#000000</span>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+              <span class="text-xs text-slate-400">Progresso:</span>
+              <span id="progressPercent" class="text-xs font-bold text-emerald-400">25%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step Wizard Nav -->
+        <div class="grid grid-cols-4 gap-2 text-center text-xs">
+          <div id="wizardStep1" class="py-2 rounded-lg bg-sky-500 text-white font-bold flex items-center justify-center gap-1.5 transition-all">
+            <span class="w-5 h-5 rounded-full bg-white/20 text-[10px] flex items-center justify-center">1</span>
+            <span class="hidden sm:inline">Curva ABC</span>
+          </div>
+          <div id="wizardStep2" class="py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all">
+            <span class="w-5 h-5 rounded-full bg-slate-700 text-[10px] flex items-center justify-center">2</span>
+            <span class="hidden sm:inline">Endereçamento</span>
+          </div>
+          <div id="wizardStep3" class="py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all">
+            <span class="w-5 h-5 rounded-full bg-slate-700 text-[10px] flex items-center justify-center">3</span>
+            <span class="hidden sm:inline">Metodologia 5S</span>
+          </div>
+          <div id="wizardStep4" class="py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all">
+            <span class="w-5 h-5 rounded-full bg-slate-700 text-[10px] flex items-center justify-center">4</span>
+            <span class="hidden sm:inline">Plano de Ação</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 1: CURVA ABC -->
+      <section id="phase1Section" class="glass-card rounded-2xl p-5 sm:p-7 space-y-6">
+        
+        <!-- Concept Box Cebrac Style -->
+        <div class="bg-slate-900/80 border-l-4 border-amber-500 p-4 rounded-r-xl space-y-2">
+          <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>Lembrete Rápido de Logística • Regra da Curva ABC (Pareto):</span>
+          </div>
+          <ul class="text-xs sm:text-sm text-slate-300 space-y-1 ml-1">
+            <li>• <strong class="text-emerald-400">Classe A:</strong> Produtos com <strong>MAIOR Valor Total Movimentado</strong> (R$). Merecem controle rigoroso e localização nobre no galpão.</li>
+            <li>• <strong class="text-sky-400">Classe B:</strong> Produtos com <strong>Valor Intermediário</strong> (R$). Exigem controle moderado de giro.</li>
+            <li>• <strong class="text-purple-400">Classe C:</strong> Produtos com <strong>MENOR Valor Total Movimentado</strong> (R$). Representam maior quantidade de itens, mas baixo valor financeiro acumulado.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
+            <i class="fa-solid fa-calculator text-sky-400 me-2"></i> Análise de Estoque Recebido
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Observe o <strong>Valor Total Movimentado (R$)</strong> de cada produto do seu lote e selecione a <strong>Classe A, B ou C</strong> correspondente para cada item.
+          </p>
+        </div>
+
+        <!-- Table of generated items -->
+        <div class="overflow-x-auto rounded-xl border border-slate-700/80">
+          <table class="w-full text-left text-xs sm:text-sm text-slate-200">
+            <thead class="bg-slate-900/90 uppercase text-[11px] text-slate-400 tracking-wider border-b border-slate-700">
+              <tr>
+                <th scope="col" class="py-3 px-4">Item de Estoque</th>
+                <th scope="col" class="py-3 px-4 text-center">Demanda (Unid)</th>
+                <th scope="col" class="py-3 px-4 text-right">Valor Unitário</th>
+                <th scope="col" class="py-3 px-4 text-right font-bold text-amber-400">Valor Total Movimentado</th>
+                <th scope="col" class="py-3 px-4 text-center min-w-[150px]">Classificação ABC</th>
+              </tr>
+            </thead>
+            <tbody id="abcTableBody" class="divide-y divide-slate-800 bg-slate-900/40">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button 
+            onclick="validatePhase1()"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 text-sm"
+          >
+            <span>Confirmar Curva ABC e Avançar</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- FASE 2: ENDEREÇAMENTO E ARMAZENAGEM -->
+      <section id="phase2Section" class="hidden glass-card rounded-2xl p-5 sm:p-7 space-y-6">
+        
+        <div class="bg-slate-900/80 border-l-4 border-sky-500 p-4 rounded-r-xl space-y-1">
+          <div class="flex items-center gap-2 text-sky-400 font-bold text-sm">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>Princípio da Armazenagem Inteligente:</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300">
+            Para reduzir o tempo de movimentação (Picking) e otimizar as rotas internas, os itens da <strong>Classe A</strong> devem ser guardados próximos à Doca de Expedição/Entrada. Itens <strong>Classe B</strong> nas posições intermediárias e itens <strong>Classe C</strong> no fundo ou niveis superiores.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
+            <i class="fa-solid fa-warehouse text-amber-400 me-2"></i> Organização das Prateleiras e Corredores
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Escolha para qual <strong>Zona do Galpão</strong> cada produto do seu estoque deve ser direcionado:
+          </p>
+        </div>
+
+        <!-- Interactive Layout Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <!-- Zone 1 -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-emerald-500/30 relative">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase text-emerald-400">Zona 1: Doca & Expedição</span>
+              <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/20">Acesso Rápido</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Destinada a itens de ALTISSIMO giro e alto valor movimentado (Classe A).</p>
+          </div>
+
+          <!-- Zone 2 -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-sky-500/30 relative">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase text-sky-400">Zona 2: Corredores Médios</span>
+              <span class="bg-sky-500/10 text-sky-400 text-[10px] font-bold px-2 py-0.5 rounded border border-sky-500/20">Acesso Intermediário</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Destinada a itens de giro intermediário (Classe B).</p>
+          </div>
+
+          <!-- Zone 3 -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-purple-500/30 relative">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase text-purple-400">Zona 3: Fundos & Aéreo</span>
+              <span class="bg-purple-500/10 text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded border border-purple-500/20">Acesso Secundário</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Destinada a itens de menor rotação e menor valor acumulado (Classe C).</p>
+          </div>
+        </div>
+
+        <!-- Address Selection List -->
+        <div id="addressingList" class="space-y-3">
+          <!-- Dynamically generated -->
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+          <button 
+            onclick="goToPhase(1)"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition-all"
+          >
+            <i class="fa-solid fa-arrow-left me-1"></i> Voltar Fase 1
+          </button>
+          
+          <button 
+            onclick="validatePhase2()"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 text-sm"
+          >
+            <span>Salvar Endereçamento e Avançar</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- FASE 3: METODOLOGIA 5S NA LOGÍSTICA -->
+      <section id="phase3Section" class="hidden glass-card rounded-2xl p-5 sm:p-7 space-y-6">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
+            <i class="fa-solid fa-broom text-purple-400 me-2"></i> Diagnóstico e Metodologia 5S no Galpão
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Relacione o problema encontrado na rotina logística ao Senso (S) correto da Metodologia 5S para solucioná-lo.
+          </p>
+        </div>
+
+        <!-- 5S Scenarios Grid -->
+        <div id="fiveSContainer" class="space-y-4">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+          <button 
+            onclick="goToPhase(2)"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition-all"
+          >
+            <i class="fa-solid fa-arrow-left me-1"></i> Voltar Fase 2
+          </button>
+          
+          <button 
+            onclick="validatePhase3()"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 text-sm"
+          >
+            <span>Avançar para o Plano de Ação</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- FASE 4: PLANO DE AÇÃO E PRIORIDADES -->
+      <section id="phase4Section" class="hidden glass-card rounded-2xl p-5 sm:p-7 space-y-6">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
+            <i class="fa-solid fa-list-check text-amber-400 me-2"></i> Sequenciamento Lógico de Reorganização
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Ordene as etapas abaixo da <strong>1ª Ação (Mais urgente)</strong> até a <strong>4ª Ação</strong> para reestruturar com sucesso a operação do galpão.
+          </p>
+        </div>
+
+        <!-- Priority Ordering Container -->
+        <div id="actionPlanContainer" class="space-y-3">
+          <!-- Dynamically populated drag or re-order controls -->
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+          <button 
+            onclick="goToPhase(3)"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition-all"
+          >
+            <i class="fa-solid fa-arrow-left me-1"></i> Voltar Fase 3
+          </button>
+          
+          <button 
+            onclick="finalizeGame()"
+            class="bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-white font-extrabold py-3.5 px-7 rounded-xl shadow-xl shadow-emerald-600/25 transition-all flex items-center gap-2 text-sm transform active:scale-95"
+          >
+            <i class="fa-solid fa-flag-checkered text-lg"></i>
+            <span>Finalizar Desafio e Ver Resultado</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- FINAL STEP: DASHBOARD DE RESULTADOS E COMPROVAÇÃO DE PROVA -->
+      <section id="finalResultsSection" class="hidden space-y-6">
+        
+        <!-- CERTIFICATE / SUMMARY CARD (PRINTABLE) -->
+        <div id="certificateCard" class="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border border-slate-700 print-card">
+          
+          <!-- Header Certificate -->
+          <div class="border-b border-slate-700 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 bg-sky-500/10 text-sky-400 text-xs font-bold px-3 py-1 rounded-full border border-sky-500/20 mb-2">
+                <i class="fa-solid fa-award"></i> RELATÓRIO DE DESEMPENHO LOGÍSTICO
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Comprovante do Gestor Logístico</h2>
+              <p class="text-xs sm:text-sm text-slate-400">Operação Resgate de Estoque • Curso Técnico Cebrac</p>
+            </div>
+
+            <!-- Authentic Hash Stamp -->
+            <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-center sm:text-right shrink-0">
+              <span class="text-[10px] text-slate-500 block uppercase font-mono">Código de Validação Único</span>
+              <span id="finalAuthHash" class="text-sm font-mono font-bold text-amber-400">LOG-00000000</span>
+              <span id="finalTimestamp" class="text-[10px] text-slate-400 block mt-0.5">00/00/0000 às 00:00</span>
+            </div>
+          </div>
+
+          <!-- Student Meta Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <div>
+              <span class="text-xs text-slate-400 block">Nome do Aluno(a):</span>
+              <strong id="finalStudentName" class="text-base text-white font-bold block">--</strong>
+            </div>
+            <div>
+              <span class="text-xs text-slate-400 block">Data de Nascimento:</span>
+              <strong id="finalStudentDob" class="text-base text-white font-bold block">--/--/----</strong>
+            </div>
+          </div>
+
+          <!-- Dynamic Final Grade KPI Block -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-xl border border-slate-700 text-center flex flex-col justify-center items-center">
+              <span class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Nota Final</span>
+              <span id="finalGrade" class="text-4xl font-extrabold text-emerald-400">10,0</span>
+              <span id="finalStatusText" class="text-[11px] font-semibold text-slate-300 mt-1">Aprovado com Excelência</span>
+            </div>
+
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-center items-center">
+              <i class="fa-solid fa-bullseye text-sky-400 text-xl mb-1"></i>
+              <span class="text-xs text-slate-400">Acuracidade Estoque</span>
+              <span id="kpiAccuracy" class="text-xl font-bold text-white mt-1">100%</span>
+              <span class="text-[10px] text-emerald-400 mt-0.5">Divergências ZERADAS</span>
+            </div>
+
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-center items-center">
+              <i class="fa-solid fa-stopwatch text-amber-400 text-xl mb-1"></i>
+              <span class="text-xs text-slate-400">Tempo de Picking</span>
+              <span id="kpiPicking" class="text-xl font-bold text-white mt-1">-38%</span>
+              <span class="text-[10px] text-sky-400 mt-0.5">Rotas Otimizadas</span>
+            </div>
+
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-center items-center">
+              <i class="fa-solid fa-truck-fast text-purple-400 text-xl mb-1"></i>
+              <span class="text-xs text-slate-400">Nível OTIF</span>
+              <span id="kpiOtif" class="text-xl font-bold text-white mt-1">99,4%</span>
+              <span class="text-[10px] text-emerald-400 mt-0.5">Entregas no Prazo</span>
+            </div>
+          </div>
+
+          <!-- Breakdown Phase Summary -->
+          <div class="space-y-3 pt-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">
+              <i class="fa-solid fa-list-check me-1 text-sky-400"></i> Desempenho Detalhado por Etapa:
+            </h4>
+            
+            <div id="phaseBreakdown" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- Evaluation Feedback Message -->
+          <div id="feedbackBox" class="bg-slate-900/90 p-4 rounded-xl border border-slate-700 text-xs text-slate-300 leading-relaxed">
+            <!-- Dynamic feedback -->
+          </div>
+
+        </div>
+
+        <!-- ACTION BUTTONS (WHATSAPP, PRINT, RESTART) - NO PRINT -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 no-print">
+          
+          <!-- Copy for WhatsApp -->
+          <button 
+            onclick="copyWhatsAppSummary()"
+            class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+            <span>Copiar Resumo para WhatsApp / Moodle</span>
+          </button>
+
+          <!-- Print / Save PDF -->
+          <button 
+            onclick="window.print()"
+            class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-sky-600/20 transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            <i class="fa-solid fa-print text-lg"></i>
+            <span>Imprimir / Salvar em PDF</span>
+          </button>
+
+          <!-- Restart Button -->
+          <button 
+            onclick="resetGame()"
+            class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-3.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            <i class="fa-solid fa-rotate-right"></i>
+            <span>Refazer Atividade</span>
+          </button>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800 bg-slate-900/60 py-4 text-center text-xs text-slate-500 no-print">
+    <div class="max-w-6xl mx-auto px-4">
+      <p>Operação Resgate de Estoque • Material Didático Interativo de Logística - Cebrac</p>
+    </div>
+  </footer>
+
+  <script>
+    /* =========================================================================
+       LOGISTICS APPLICATION STATE & DETERMINISTIC SEED PRNG
+       ========================================================================= */
+
+    let studentData = {
+      name: '',
+      dob: '',
+      seed: 0,
+      hashStr: ''
+    };
+
+    let generatedItems = [];
+    let phaseScores = {
+      p1: 0,
+      p2: 0,
+      p3: 0,
+      p4: 0
+    };
+
+    let userAnswers = {
+      abc: {},
+      addressing: {},
+      fiveS: {},
+      actionPlanOrder: [1, 2, 3, 4]
+    };
+
+    // Mulberry32 Deterministic PRNG Generator
+    function seedFromString(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash);
+    }
+
+    function createPRNG(seed) {
+      return function() {
+        var t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 8, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    // Date Mask DD/MM/AAAA
+    function maskDate(input) {
+      let value = input.value.replace(/\D/g, ""); // Keep only digits
+      if (value.length > 8) value = value.substring(0, 8);
+
+      if (value.length > 4) {
+        input.value = `${value.substring(0, 2)}/${value.substring(2, 4)}/${value.substring(4)}`;
+      } else if (value.length > 2) {
+        input.value = `${value.substring(0, 2)}/${value.substring(2)}`;
+      } else {
+        input.value = value;
+      }
+    }
+
+    // Custom Toast Notification System (replaces alert)
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.innerText = message;
+
+      if (type === 'error') {
+        toastIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-red-500/20 text-red-400 border border-red-500/30';
+        toastIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+      } else if (type === 'success') {
+        toastIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        toastIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+      } else {
+        toastIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-sky-500/20 text-sky-400 border border-sky-500/30';
+        toastIcon.innerHTML = '<i class="fa-solid fa-info"></i>';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    // Handle Registration Submit
+    function handleRegistration(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('inputName').value.trim();
+      const dobInput = document.getElementById('inputDob').value.trim();
+
+      if (!nameInput || nameInput.length < 3) {
+        showToast('Por favor, informe seu nome completo.', 'error');
+        return;
+      }
+
+      if (dobInput.length < 10) {
+        showToast('Por favor, informe a data de nascimento completa no formato DD/MM/AAAA.', 'error');
+        return;
+      }
+
+      // Set Student State
+      studentData.name = nameInput;
+      studentData.dob = dobInput;
+      
+      const cleanKey = (nameInput.toLowerCase() + dobInput.replace(/\D/g, '')).replace(/\s+/g, '');
+      studentData.seed = seedFromString(cleanKey);
+      
+      // Hash Code
+      const hashHex = (studentData.seed.toString(16) + '8a9b2c').substring(0, 8).toUpperCase();
+      studentData.hashStr = `LOG-${hashHex}`;
+
+      // Update Header Badges
+      document.getElementById('headerStudentName').innerText = nameInput;
+      document.getElementById('headerStudentDob').innerText = dobInput;
+      document.getElementById('studentBadgeHeader').classList.remove('hidden');
+      document.getElementById('studentBadgeHeader').classList.add('flex');
+      document.getElementById('seedBadge').innerText = `#${hashHex}`;
+
+      // Generate items based on seed
+      generateUniqueInventory(studentData.seed);
+
+      // Transition Screen
+      document.getElementById('stepRegistration').classList.add('hidden');
+      document.getElementById('gameContainer').classList.remove('hidden');
+
+      // Build Phase 1 & Phase 2
+      renderPhase1Table();
+      renderPhase2Addressing();
+      renderPhase3FiveS();
+      renderPhase4ActionPlan();
+
+      goToPhase(1);
+      showToast(`Bem-vindo(a), ${nameInput.split(' ')[0]}! Seu desafio foi gerado.`, 'success');
+    }
+
+    // Inventory Data Pool Generator
+    function generateUniqueInventory(seed) {
+      const prng = createPRNG(seed);
+
+      const catalogPool = [
+        { name: "Caixas de Papelão 50x50", baseDemand: 1200, basePrice: 4.50 },
+        { name: "Paletes de Madeira PBR", baseDemand: 450, basePrice: 65.00 },
+        { name: "Empilhadeira Elétrica - Peças", baseDemand: 15, basePrice: 1850.00 },
+        { name: "Fita Adesiva Industrial 45mm", baseDemand: 2200, basePrice: 3.20 },
+        { name: "Etiquetas Código de Barras (Rolo)", baseDemand: 3500, basePrice: 1.80 },
+        { name: "Filme Stretch 500mm 10kg", baseDemand: 300, basePrice: 78.00 },
+        { name: "Caixas Plásticas Organizadoras", baseDemand: 180, basePrice: 42.00 },
+        { name: "Bobinas de Plástico Bolha", baseDemand: 90, basePrice: 110.00 },
+        { name: "Lanternas e Baterias de Galpão", baseDemand: 60, basePrice: 25.00 },
+        { name: "Conectores de Aço Racks", baseDemand: 800, basePrice: 8.50 }
+      ];
+
+      // Shuffle pool deterministically
+      const shuffled = [...catalogPool].sort(() => prng() - 0.5);
+      
+      // Select 6 items
+      const selected = shuffled.slice(0, 6);
+
+      // Customize numbers slightly per student with PRNG
+      generatedItems = selected.map((item, index) => {
+        const demandVar = Math.floor((prng() * 0.4 + 0.8) * item.baseDemand);
+        const priceVar = parseFloat(((prng() * 0.3 + 0.85) * item.basePrice).toFixed(2));
+        const totalValue = parseFloat((demandVar * priceVar).toFixed(2));
+
+        return {
+          id: `item_${index + 1}`,
+          name: item.name,
+          demand: demandVar,
+          unitPrice: priceVar,
+          totalValue: totalValue
+        };
+      });
+
+      // Determine correct ABC Classes based on total monetary ranking
+      // Sort copy descending
+      const sortedByValue = [...generatedItems].sort((a, b) => b.totalValue - a.totalValue);
+      
+      // Top 2 items -> Classe A
+      // Next 2 items -> Classe B
+      // Last 2 items -> Classe C
+      sortedByValue.forEach((item, idx) => {
+        let correctClass = 'C';
+        let zone = 'Zona 3 (Fundos/Aéreo)';
+        if (idx < 2) {
+          correctClass = 'A';
+          zone = 'Zona 1 (Doca/Expedição)';
+        } else if (idx < 4) {
+          correctClass = 'B';
+          zone = 'Zona 2 (Corredores Médios)';
+        }
+
+        // Assign correct answer back to item in generatedItems
+        const target = generatedItems.find(i => i.id === item.id);
+        target.correctClass = correctClass;
+        target.correctZone = zone;
+      });
+    }
+
+    function renderPhase1Table() {
+      const tbody = document.getElementById('abcTableBody');
+      tbody.innerHTML = '';
+
+      generatedItems.forEach((item) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/50 transition-colors';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-semibold text-white">
+            <i class="fa-solid fa-box text-slate-500 me-2"></i>${item.name}
+          </td>
+          <td class="py-3 px-4 text-center font-mono">${item.demand.toLocaleString('pt-BR')} un</td>
+          <td class="py-3 px-4 text-right font-mono">R$ ${item.unitPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+          <td class="py-3 px-4 text-right font-mono font-bold text-amber-400">
+            R$ ${item.totalValue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+          </td>
+          <td class="py-3 px-4 text-center">
+            <select 
+              id="select_abc_${item.id}" 
+              onchange="userAnswers.abc['${item.id}'] = this.value"
+              class="bg-slate-800 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-full max-w-[160px]"
+            >
+              <option value="">[ Selecionar ]</option>
+              <option value="A">Classe A (Alto Valor)</option>
+              <option value="B">Classe B (Médio Valor)</option>
+              <option value="C">Classe C (Baixo Valor)</option>
+            </select>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderPhase2Addressing() {
+      const container = document.getElementById('addressingList');
+      container.innerHTML = '';
+
+      generatedItems.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+        
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-amber-400 font-bold shrink-0">
+              <i class="fa-solid fa-location-dot text-xs"></i>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-white block">${item.name}</span>
+              <span class="text-[11px] text-slate-400">Total Movimentado: R$ ${item.totalValue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+            </div>
+          </div>
+
+          <div class="w-full sm:w-auto">
+            <select 
+              id="select_zone_${item.id}" 
+              onchange="userAnswers.addressing['${item.id}'] = this.value"
+              class="bg-slate-800 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none w-full sm:w-64"
+            >
+              <option value="">[ Selecionar Endereçamento ]</option>
+              <option value="Zona 1 (Doca/Expedição)">Zona 1: Próximo à Doca / Expedição</option>
+              <option value="Zona 2 (Corredores Médios)">Zona 2: Corredores Intermediários</option>
+              <option value="Zona 3 (Fundos/Aéreo)">Zona 3: Fundos / Prateleiras Altas</option>
+            </select>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    const fiveSData = [
+      {
+        id: '5s_1',
+        title: 'Cenário 1: Caixas rasgadas e paletes velhos na doca',
+        desc: 'Excesso de material danificado e lixo entulhado bloqueando a passagem de empilhadeiras.',
+        options: [
+          { val: 'Seiri', label: '1º S - Seiri (Senso de Utilização / Descarte de Obsoletos)' },
+          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização / Vagas no Piso)' },
+          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza)' },
+          { val: 'Shitsuke', label: '5º S - Shitsuke (Senso de Disciplina)' }
+        ],
+        correct: 'Seiri'
+      },
+      {
+        id: '5s_2',
+        title: 'Cenário 2: Ferramentas e estiletes espalhados sem local fixo',
+        desc: 'Operadores perdem tempo procurando fita crepe e leitores de código de barras no início do turno.',
+        options: [
+          { val: 'Seiketsu', label: '4º S - Seiketsu (Senso de Padronização)' },
+          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização / Marcadores e Quadros)' },
+          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza)' },
+          { val: 'Seiri', label: '1º S - Seiri (Senso de Utilização)' }
+        ],
+        correct: 'Seiton'
+      },
+      {
+        id: '5s_3',
+        title: 'Cenário 3: Poeira acumulada e óleo derramado no corredor C',
+        desc: 'Sujeira no piso causando risco de derrapagem da empilhadeira e sujando os produtos.',
+        options: [
+          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza e Inspeção Preventiva)' },
+          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização)' },
+          { val: 'Shitsuke', label: '5º S - Shitsuke (Senso de Disciplina)' },
+          { val: 'Seiketsu', label: '4º S - Seiketsu (Senso de Padronização)' }
+        ],
+        correct: 'Seiso'
+      },
+      {
+        id: '5s_4',
+        title: 'Cenário 4: Falta de padrão nas etiquetas de identificação',
+        desc: 'Cada funcionário escreve o endereço da caixa à mão de um jeito diferente, gerando confusão.',
+        options: [
+          { val: 'Seiketsu', label: '4º S - Seiketsu (Senso de Padronização e Procedimentos POP)' },
+          { val: 'Seiri', label: '1º S - Seiri (Senso de Utilização)' },
+          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza)' },
+          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização)' }
+        ],
+        correct: 'Seiketsu'
+      }
+    ];
+
+    function renderPhase3FiveS() {
+      const container = document.getElementById('fiveSContainer');
+      container.innerHTML = '';
+
+      fiveSData.forEach((scen) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/70 p-4 rounded-xl border border-slate-800 space-y-3';
+
+        let optionsHTML = scen.options.map(opt => `
+          <label class="flex items-center gap-2.5 bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60 cursor-pointer hover:bg-slate-800 transition-colors">
+            <input 
+              type="radio" 
+              name="${scen.id}" 
+              value="${opt.val}" 
+              onchange="userAnswers.fiveS['${scen.id}'] = '${opt.val}'"
+              class="w-4 h-4 text-sky-500 bg-slate-900 border-slate-700 focus:ring-sky-500"
+            />
+            <span class="text-xs text-slate-200 font-medium">${opt.label}</span>
+          </label>
+        `).join('');
+
+        card.innerHTML = `
+          <div>
+            <h4 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-xs"></i> ${scen.title}
+            </h4>
+            <p class="text-xs text-slate-300 mt-1">${scen.desc}</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            ${optionsHTML}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    const actionStepsData = [
+      { id: 1, text: "Realizar Inventário Físico Inicial e Descarte de Obsoletos (Limpeza de Galpão)" },
+      { id: 2, text: "Classificar os produtos pela Curva ABC com base no Valor Financeiro Total" },
+      { id: 3, text: "Reorganizar o Endereçamento movendo os itens Classe A para perto da Expedição" },
+      { id: 4, text: "Treinar a Equipe na Metodologia 5S e implantar Auditoria Diária" }
+    ];
+
+    function renderPhase4ActionPlan() {
+      const container = document.getElementById('actionPlanContainer');
+      container.innerHTML = '';
+
+      userAnswers.actionPlanOrder.forEach((stepId, index) => {
+        const stepObj = actionStepsData.find(s => s.id === stepId);
+        
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 flex items-center justify-between gap-3';
+        
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold text-xs flex items-center justify-center shrink-0">
+              ${index + 1}º
+            </span>
+            <span class="text-xs sm:text-sm font-medium text-slate-200">${stepObj.text}</span>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            <button 
+              onclick="moveActionStep(${index}, -1)" 
+              ${index === 0 ? 'disabled class="opacity-30 cursor-not-allowed px-2 py-1 bg-slate-800 rounded text-xs"' : 'class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded text-xs transition-colors"'}
+              title="Mover para cima"
+            >
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button 
+              onclick="moveActionStep(${index}, 1)" 
+              ${index === 3 ? 'disabled class="opacity-30 cursor-not-allowed px-2 py-1 bg-slate-800 rounded text-xs"' : 'class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded text-xs transition-colors"'}
+              title="Mover para baixo"
+            >
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function moveActionStep(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= userAnswers.actionPlanOrder.length) return;
+
+      const temp = userAnswers.actionPlanOrder[index];
+      userAnswers.actionPlanOrder[index] = userAnswers.actionPlanOrder[newIndex];
+      userAnswers.actionPlanOrder[newIndex] = temp;
+
+      renderPhase4ActionPlan();
+    }
+
+    function goToPhase(phaseNum) {
+      // Hide all phases
+      document.getElementById('phase1Section').classList.add('hidden');
+      document.getElementById('phase2Section').classList.add('hidden');
+      document.getElementById('phase3Section').classList.add('hidden');
+      document.getElementById('phase4Section').classList.add('hidden');
+
+      // Update Wizard Tabs
+      for (let i = 1; i <= 4; i++) {
+        const tab = document.getElementById(`wizardStep${i}`);
+        if (i === phaseNum) {
+          tab.className = 'py-2 rounded-lg bg-sky-500 text-white font-bold flex items-center justify-center gap-1.5 transition-all shadow-md';
+        } else if (i < phaseNum) {
+          tab.className = 'py-2 rounded-lg bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30 flex items-center justify-center gap-1.5 transition-all';
+        } else {
+          tab.className = 'py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all';
+        }
+      }
+
+      const titles = {
+        1: "Fase 1: Curva ABC de Estoque",
+        2: "Fase 2: Endereçamento e Armazenagem",
+        3: "Fase 3: Metodologia 5S na Logística",
+        4: "Fase 4: Plano de Ação e Prioridades"
+      };
+
+      document.getElementById('phaseTitle').innerText = titles[phaseNum];
+      document.getElementById('progressPercent').innerText = `${phaseNum * 25}%`;
+
+      // Show target phase
+      document.getElementById(`phase${phaseNum}Section`).classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validatePhase1() {
+      // Check if all items answered
+      const keys = Object.keys(userAnswers.abc);
+      if (keys.length < generatedItems.length || Object.values(userAnswers.abc).some(v => !v)) {
+        showToast('Por favor, selecione a Classe (A, B ou C) para TODOS os produtos da tabela.', 'error');
+        return;
+      }
+
+      // Calculate score for Phase 1
+      let correctCount = 0;
+      generatedItems.forEach(item => {
+        if (userAnswers.abc[item.id] === item.correctClass) {
+          correctCount++;
+        }
+      });
+
+      phaseScores.p1 = (correctCount / generatedItems.length) * 10;
+      goToPhase(2);
+      showToast('Fase 1 concluída! Agora enderece os produtos.', 'success');
+    }
+
+    function validatePhase2() {
+      const keys = Object.keys(userAnswers.addressing);
+      if (keys.length < generatedItems.length || Object.values(userAnswers.addressing).some(v => !v)) {
+        showToast('Por favor, selecione a Zona de Armazenagem para TODOS os produtos.', 'error');
+        return;
+      }
+
+      let correctCount = 0;
+      generatedItems.forEach(item => {
+        if (userAnswers.addressing[item.id] === item.correctZone) {
+          correctCount++;
+        }
+      });
+
+      phaseScores.p2 = (correctCount / generatedItems.length) * 10;
+      goToPhase(3);
+      showToast('Fase 2 concluída! Responda às perguntas do 5S.', 'success');
+    }
+
+    function validatePhase3() {
+      const answered = Object.keys(userAnswers.fiveS).length;
+      if (answered < fiveSData.length) {
+        showToast('Por favor, responda a todos os cenários do 5S.', 'error');
+        return;
+      }
+
+      let correctCount = 0;
+      fiveSData.forEach(scen => {
+        if (userAnswers.fiveS[scen.id] === scen.correct) {
+          correctCount++;
+        }
+      });
+
+      phaseScores.p3 = (correctCount / fiveSData.length) * 10;
+      goToPhase(4);
+      showToast('Fase 3 concluída! Ordene o Plano de Ação.', 'success');
+    }
+
+    function finalizeGame() {
+      // Check Phase 4 score
+      const correctOrder = [1, 2, 3, 4];
+      let matchCount = 0;
+      userAnswers.actionPlanOrder.forEach((val, idx) => {
+        if (val === correctOrder[idx]) matchCount++;
+      });
+
+      phaseScores.p4 = (matchCount / 4) * 10;
+
+      // Final Grade Calculation (Weighted or Average)
+      const finalScoreNum = (phaseScores.p1 * 0.35) + (phaseScores.p2 * 0.35) + (phaseScores.p3 * 0.15) + (phaseScores.p4 * 0.15);
+      const finalGradeFormatted = finalScoreNum.toFixed(1).replace('.', ',');
+
+      // Render Final Screen
+      document.getElementById('phase1Section').classList.add('hidden');
+      document.getElementById('phase2Section').classList.add('hidden');
+      document.getElementById('phase3Section').classList.add('hidden');
+      document.getElementById('phase4Section').classList.add('hidden');
+      document.getElementById('wizardStep4').className = 'py-2 rounded-lg bg-emerald-500 text-white font-bold flex items-center justify-center gap-1.5 shadow-md';
+      document.getElementById('progressPercent').innerText = '100%';
+
+      // Set Certificate Info
+      document.getElementById('finalStudentName').innerText = studentData.name;
+      document.getElementById('finalStudentDob').innerText = studentData.dob;
+      document.getElementById('finalAuthHash').innerText = studentData.hashStr;
+      
+      const now = new Date();
+      document.getElementById('finalTimestamp').innerText = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+
+      document.getElementById('finalGrade').innerText = finalGradeFormatted;
+
+      // Dynamic KPIs and Status Text
+      const statusEl = document.getElementById('finalStatusText');
+      if (finalScoreNum >= 9.0) {
+        statusEl.innerText = 'Aprovado com Louvor (Gestor Sênior)';
+        statusEl.className = 'text-[11px] font-semibold text-emerald-400 mt-1';
+        document.getElementById('kpiAccuracy').innerText = '99,8%';
+        document.getElementById('kpiPicking').innerText = '-42%';
+        document.getElementById('kpiOtif').innerText = '99,8%';
+      } else if (finalScoreNum >= 7.0) {
+        statusEl.innerText = 'Aprovado (Gestor Operacional)';
+        statusEl.className = 'text-[11px] font-semibold text-sky-400 mt-1';
+        document.getElementById('kpiAccuracy').innerText = '95,2%';
+        document.getElementById('kpiPicking').innerText = '-28%';
+        document.getElementById('kpiOtif').innerText = '96,5%';
+      } else {
+        statusEl.innerText = 'Atenção Necessária (Revisar Conceitos)';
+        statusEl.className = 'text-[11px] font-semibold text-amber-400 mt-1';
+        document.getElementById('kpiAccuracy').innerText = '82,0%';
+        document.getElementById('kpiPicking').innerText = '-10%';
+        document.getElementById('kpiOtif').innerText = '88,0%';
+      }
+
+      // Render Phase Breakdown
+      const breakdownEl = document.getElementById('phaseBreakdown');
+      breakdownEl.innerHTML = `
+        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
+          <span class="text-slate-300">1. Curva ABC (Pareto)</span>
+          <strong class="${phaseScores.p1 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p1.toFixed(1).replace('.', ',')} / 10</strong>
+        </div>
+        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
+          <span class="text-slate-300">2. Endereçamento e Armazenagem</span>
+          <strong class="${phaseScores.p2 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p2.toFixed(1).replace('.', ',')} / 10</strong>
+        </div>
+        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
+          <span class="text-slate-300">3. Metodologia 5S Logística</span>
+          <strong class="${phaseScores.p3 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p3.toFixed(1).replace('.', ',')} / 10</strong>
+        </div>
+        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
+          <span class="text-slate-300">4. Plano de Ação Logístico</span>
+          <strong class="${phaseScores.p4 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p4.toFixed(1).replace('.', ',')} / 10</strong>
+        </div>
+      `;
+
+      // Feedback Text
+      const feedbackEl = document.getElementById('feedbackBox');
+      if (finalScoreNum >= 8.5) {
+        feedbackEl.innerHTML = `<p><strong class="text-emerald-400">Excelente desempenho!</strong> Você demonstrou domínio completo dos conceitos de Curva ABC, posicionamento estratégico no galpão, organização de ambiente de trabalho com 5S e estruturação de plano de ação. Seu galpão resgatado opera com alta eficiência!</p>`;
+      } else {
+        feedbackEl.innerHTML = `<p><strong class="text-amber-400">Bom trabalho!</strong> Você concluiu o desafio logístico. Lembre-se sempre de priorizar a localização dos itens Classe A perto da expedição para economizar tempo nas rotas internas do galpão.</p>`;
+      }
+
+      document.getElementById('finalResultsSection').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Desafio concluído com sucesso! Confira seu relatório.', 'success');
+    }
+
+    function copyWhatsAppSummary() {
+      const finalGrade = document.getElementById('finalGrade').innerText;
+      const textToCopy = `*COMPROVANTE DE DESAFIO LOGÍSTICO - CEBRAC*\n` +
+        `📦 *Operação Resgate de Estoque*\n\n` +
+        `👤 *Aluno:* ${studentData.name}\n` +
+        `📅 *Nascimento:* ${studentData.dob}\n` +
+        `🎯 *Nota Final:* ${finalGrade} / 10,0\n` +
+        `🔑 *Código Autenticidade:* ${studentData.hashStr}\n\n` +
+        `📊 *Desempenho por Etapa:*\n` +
+        `• Curva ABC: ${phaseScores.p1.toFixed(1).replace('.', ',')}/10\n` +
+        `• Endereçamento: ${phaseScores.p2.toFixed(1).replace('.', ',')}/10\n` +
+        `• Diagnóstico 5S: ${phaseScores.p3.toFixed(1).replace('.', ',')}/10\n` +
+        `• Plano de Ação: ${phaseScores.p4.toFixed(1).replace('.', ',')}/10\n\n` +
+        `Status: Desafio Concluído.`;
+
+      // Copy fallback to clipboard
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = textToCopy;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      
+      try {
+        document.execCommand('copy');
+        showToast('Resumo copiado com sucesso! Cole na conversa com o professor.', 'success');
+      } catch (err) {
+        showToast('Erro ao copiar automaticamente. Tente selecionar o texto.', 'error');
+      }
+      
+      document.body.removeChild(tempTextArea);
+    }
+
+    function resetGame() {
+      if (confirm('Deseja refazer a atividade do início?')) {
+        location.reload();
+      }
+    }
+  </script>
+</body>
+</html>
