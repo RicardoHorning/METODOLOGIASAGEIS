@@ -1,44 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Operação Resgate de Estoque - Desafio do Gestor Logístico</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Design Thinking na Logística - Atividade Prática</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- Google Fonts - Inter -->
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
           },
           colors: {
-            brand: {
-              50: '#f0f7ff',
-              100: '#e0effe',
-              500: '#0284c7',
-              600: '#0369a1',
-              700: '#075985',
-              800: '#0c4a6e',
-              900: '#0f172a',
-            },
             logistics: {
-              amber: '#f59e0b',
-              green: '#10b981',
-              blue: '#3b82f6',
-              purple: '#8b5cf6',
-              slate: '#1e293b'
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              500: '#f97316',
+              600: '#ea580c',
             }
           }
         }
@@ -48,1156 +43,1381 @@
 
   <style>
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0f172a;
-      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f8fafc;
     }
 
-    /* Print styles for printing certificate / report */
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    /* Canvas touch fix */
+    canvas {
+      touch-action: none;
+    }
+
+    /* Print styles for export */
     @media print {
-      body {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-      }
       .no-print {
         display: none !important;
       }
       .print-only {
         display: block !important;
       }
-      .print-card {
-        border: 2px solid #000 !important;
-        box-shadow: none !important;
-        background: #fff !important;
-        color: #000 !important;
+      body {
+        background-color: white !important;
+        color: black !important;
       }
-    }
-
-    .print-only {
-      display: none;
-    }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #1e293b;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #475569;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #64748b;
-    }
-
-    .glass-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* Smooth step transitions */
-    .step-content {
-      transition: all 0.3s ease-in-out;
+      .card-print {
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-logistics-500 selection:text-white">
 
-  <!-- HEADER / NAVBAR -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 no-print">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+  <!-- HEADER & NAVBAR -->
+  <header class="sticky top-0 z-40 bg-logistics-900 text-white shadow-lg no-print">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
-          <i class="fa-solid me-0 fa-boxes-packing text-lg"></i>
+        <div class="w-10 h-10 rounded-xl bg-accent-500 flex items-center justify-center font-bold text-white shadow-md shadow-accent-500/30">
+          <i class="fa-solid font-bold fa-truck-fast text-lg"></i>
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold text-white leading-tight">Operação Resgate de Estoque</h1>
-          <p class="text-xs text-slate-400">Desafio Prático do Gestor Logístico • Cebrac</p>
+          <h1 class="text-base font-bold leading-tight flex items-center gap-2">
+            DT Logística
+            <span class="text-[10px] uppercase font-semibold bg-blue-800/80 text-blue-200 px-2 py-0.5 rounded-full border border-blue-700/50">Prática</span>
+          </h1>
+          <p class="text-xs text-blue-200 font-medium" id="headerGroupLabel">Grupo não definido</p>
         </div>
       </div>
-      
-      <div id="studentBadgeHeader" class="hidden items-center gap-3 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
-        <i class="fa-solid fa-user-gear text-amber-400 text-sm"></i>
-        <div class="text-xs text-right">
-          <span id="headerStudentName" class="font-semibold text-white block">Aluno</span>
-          <span id="headerStudentDob" class="text-slate-400 block text-[10px]">--/--/----</span>
+
+      <div class="flex items-center gap-2">
+        <span id="saveBadge" class="hidden sm:inline-flex items-center gap-1.5 text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-500/30 font-medium">
+          <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Salvo
+        </span>
+        <button onclick="confirmReset()" class="text-xs text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5" title="Reiniciar Formulário">
+          <i class="fa-solid fa-rotate-right"></i> <span class="hidden sm:inline">Reset</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step Progress Bar -->
+    <div class="bg-logistics-950/80 px-4 py-2 border-t border-logistics-800/60">
+      <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center text-xs font-semibold mb-1">
+          <span class="text-accent-500 font-bold" id="stepCounterText">Etapa 0 de 7</span>
+          <span class="text-slate-300 font-medium" id="stepTitleHeader">Orientações</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5">
+          <div id="progressBar fill" class="bg-gradient-to-r from-logistics-500 via-blue-400 to-accent-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
       </div>
     </div>
   </header>
 
   <!-- MAIN CONTAINER -->
-  <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+  <main class="max-w-3xl mx-auto w-full px-4 py-6 flex-grow">
 
-    <!-- Custom Toast / Modal Box (Replaces alerts) -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-md bg-slate-800 border border-slate-700 text-white p-4 rounded-xl shadow-2xl flex items-center gap-3 pointer-events-none">
-      <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
-        <i class="fa-solid fa-info text-white"></i>
-      </div>
-      <div class="text-sm" id="toastMessage">Mensagem de notificação</div>
+    <!-- TOAST NOTIFICATION SYSTEM -->
+    <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 hidden bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 transition-all">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span id="toastMsg">Mensagem</span>
     </div>
 
-    <!-- STEP 0: CADASTRO INICIAL DO ALUNO -->
-    <section id="stepRegistration" class="step-content max-w-lg mx-auto py-8">
-      <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl border border-slate-700/60">
-        <div class="text-center mb-6">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-500/10 text-sky-400 mb-3 border border-sky-500/20">
-            <i class="fa-solid fa-id-card text-2xl"></i>
-          </div>
-          <h2 class="text-2xl font-bold text-white">Identificação do Aluno</h2>
-          <p class="text-xs sm:text-sm text-slate-400 mt-1">Digite seu nome e nascimento para gerar seu desafio individual exclusivo.</p>
+    <!-- ETAPA 0: ENUNCIADO E GRUPO -->
+    <section id="step-0" class="step-card bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+          0
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Atividade Prática: Design Thinking na Logística</h2>
+          <p class="text-xs text-slate-500">Desenvolvimento de soluções com foco no usuário e operação real</p>
+        </div>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200/80 rounded-xl p-4 text-xs sm:text-sm text-amber-900 space-y-2">
+        <div class="font-bold flex items-center gap-2 text-amber-950">
+          <i class="fa-solid fa-users text-accent-500 text-base"></i> Como funciona a dinâmica em grupo?
+        </div>
+        <p class="leading-relaxed">
+          • <strong>1 Aluno com o Celular:</strong> Fica responsável por registrar as respostas e consolidar o projeto neste aplicativo.<br>
+          • <strong>Demais Membros do Grupo:</strong> Discutem os pontos, dão ideias e rascunham o protótipo no papel de caderno.<br>
+          • <strong>Tempo Estimado:</strong> Siga cada etapa orientada pelo professor em sala de aula.
+        </p>
+      </div>
+
+      <div class="space-y-4 pt-2">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            Nome da Turma / Módulo / Disciplina *
+          </label>
+          <input type="text" id="inputTurma" placeholder="Ex: TÉCNICO EM LOGÍSTICA - NOITE - MÓDULO 2"
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 focus:border-logistics-500 transition outline-none"
+            oninput="saveData()">
         </div>
 
-        <form id="registrationForm" onsubmit="handleRegistration(event)" class="space-y-5">
-          <!-- Campo 1: Nome Completo -->
-          <div>
-            <label for="inputName" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-              <i class="fa-solid fa-user me-1 text-sky-400"></i> Nome Completo do Aluno
-            </label>
-            <input 
-              type="text" 
-              id="inputName" 
-              required 
-              placeholder="Ex: Carlos Eduardo da Silva"
-              class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all text-sm font-medium"
-            />
-          </div>
-
-          <!-- Campo 2: Data de Nascimento com Máscara DD/MM/AAAA -->
-          <div>
-            <label for="inputDob" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-              <i class="fa-solid fa-calendar-days me-1 text-sky-400"></i> Data de Nascimento
-            </label>
-            <input 
-              type="text" 
-              id="inputDob" 
-              required 
-              maxlength="10"
-              placeholder="DD/MM/AAAA (Apenas números)"
-              oninput="maskDate(this)"
-              class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all text-sm font-medium tracking-widest font-mono"
-            />
-            <span class="text-[11px] text-slate-400 mt-1 block">Digite somente os números. As barras ( / ) aparecem automaticamente.</span>
-          </div>
-
-          <button 
-            type="submit" 
-            class="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-sky-500/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base mt-2"
-          >
-            <i class="fa-solid fa-play"></i>
-            Iniciar Desafio Logístico
-          </button>
-        </form>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            Integrantes do Grupo (Nomes Completo) *
+          </label>
+          <textarea id="inputIntegrantes" rows="3" placeholder="Digite os nomes separados por vírgula ou em linhas separadas:&#10;1. Ana Silva&#10;2. Carlos Eduardo&#10;3. Mariana Costa"
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 focus:border-logistics-500 transition outline-none"
+            oninput="saveData()"></textarea>
+        </div>
       </div>
     </section>
 
-    <!-- STEP CONTAINER FOR PHASES (HIDDEN INITIALLY) -->
-    <div id="gameContainer" class="hidden space-y-6">
+    <!-- ETAPA 1: O DESAFIO E CASOS REAIS -->
+    <section id="step-1" class="step-card hidden bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+          1
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Etapa 1: O Desafio & Casos Reais</h2>
+          <p class="text-xs text-slate-500">Slide 34 — Escolha um problema para o seu grupo resolver</p>
+        </div>
+      </div>
 
-      <!-- TOP PROGRESS BAR & PHASE INDICATORS -->
-      <div class="glass-card rounded-2xl p-4 sm:p-5 no-print border border-slate-700/60">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-          <div>
-            <span class="text-xs font-semibold uppercase text-amber-400 tracking-wider">Missão Atual</span>
-            <h2 id="phaseTitle" class="text-lg sm:text-xl font-bold text-white">Fase 1: Curva ABC de Estoque</h2>
-          </div>
-          
-          <!-- KPI Indicator Bar -->
-          <div class="flex items-center gap-3">
-            <div class="bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
-              <i class="fa-solid fa-bullseye text-sky-400 text-xs"></i>
-              <span class="text-xs text-slate-400">Semente Prova:</span>
-              <span id="seedBadge" class="text-xs font-mono font-bold text-amber-400">#000000</span>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        Selecione um dos 5 cenários logísticos reais abaixo ou crie um desafio próprio vivenciado por vocês no trabalho ou estudos.
+      </p>
+
+      <div class="grid grid-cols-1 gap-3" id="casesGrid">
+        <!-- Case 1 -->
+        <button onclick="selectCase(1)" id="case-btn-1" class="case-card text-left p-4 rounded-xl border border-slate-200 hover:border-logistics-500 bg-slate-50 hover:bg-blue-50/50 transition relative group">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-logistics-600 bg-blue-100 px-2 py-0.5 rounded-md">Caso 1 • Armazém</span>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base">📦 Picking e-commerce com alto tempo de busca</h3>
+              <p class="text-xs text-slate-600">Erros frequentes de separação, rotas longas dentro do CD e retrabalho na expedição.</p>
             </div>
-            <div class="bg-slate-900/80 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
-              <i class="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
-              <span class="text-xs text-slate-400">Progresso:</span>
-              <span id="progressPercent" class="text-xs font-bold text-emerald-400">25%</span>
+            <i class="fa-solid fa-circle-check text-xl text-slate-300 group-[.selected]:text-logistics-600"></i>
+          </div>
+        </button>
+
+        <!-- Case 2 -->
+        <button onclick="selectCase(2)" id="case-btn-2" class="case-card text-left p-4 rounded-xl border border-slate-200 hover:border-logistics-500 bg-slate-50 hover:bg-blue-50/50 transition relative group">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">Caso 2 • Transporte</span>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base">🚚 Avarias constantes em cargas fracionadas</h3>
+              <p class="text-xs text-slate-600">Danos frequentes em caixas durante o transporte rodoviário devido à má acomodação e movimentação.</p>
+            </div>
+            <i class="fa-solid fa-circle-check text-xl text-slate-300 group-[.selected]:text-logistics-600"></i>
+          </div>
+        </button>
+
+        <!-- Case 3 -->
+        <button onclick="selectCase(3)" id="case-btn-3" class="case-card text-left p-4 rounded-xl border border-slate-200 hover:border-logistics-500 bg-slate-50 hover:bg-blue-50/50 transition relative group">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">Caso 3 • Recebimento</span>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base">🏭 Gargalo e fila de caminhões na doca</h3>
+              <p class="text-xs text-slate-600">Demora excessiva para descarregar, picos de chegada sem agendamento e pagamento de estadias.</p>
+            </div>
+            <i class="fa-solid fa-circle-check text-xl text-slate-300 group-[.selected]:text-logistics-600"></i>
+          </div>
+        </button>
+
+        <!-- Case 4 -->
+        <button onclick="selectCase(4)" id="case-btn-4" class="case-card text-left p-4 rounded-xl border border-slate-200 hover:border-logistics-500 bg-slate-50 hover:bg-blue-50/50 transition relative group">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">Caso 4 • Processos</span>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base">📋 Atrasos e erros no faturamento de pedidos</h3>
+              <p class="text-xs text-slate-600">Inconsistências de dados entre compras, estoque e nota fiscal gerando atrasos no despacho.</p>
+            </div>
+            <i class="fa-solid fa-circle-check text-xl text-slate-300 group-[.selected]:text-logistics-600"></i>
+          </div>
+        </button>
+
+        <!-- Case 5 -->
+        <button onclick="selectCase(5)" id="case-btn-5" class="case-card text-left p-4 rounded-xl border border-slate-200 hover:border-logistics-500 bg-slate-50 hover:bg-blue-50/50 transition relative group">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">Caso 5 • Estoque</span>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base">♻️ Desperdício de estoque por falta de FIFO/PEPS</h3>
+              <p class="text-xs text-slate-600">Produtos no fundo das prateleiras vencendo ou ficando obsoletos devido à falta de controle visual.</p>
+            </div>
+            <i class="fa-solid fa-circle-check text-xl text-slate-300 group-[.selected]:text-logistics-600"></i>
+          </div>
+        </button>
+
+        <!-- Custom Case -->
+        <button onclick="selectCase(0)" id="case-btn-0" class="case-card text-left p-4 rounded-xl border border-slate-200 hover:border-logistics-500 bg-slate-50 hover:bg-blue-50/50 transition relative group">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-slate-700 bg-slate-200 px-2 py-0.5 rounded-md">Opção Própria</span>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base">✏️ Criar um Desafio Personalizado</h3>
+              <p class="text-xs text-slate-600">Defina um problema específico do local de trabalho de alguém do grupo.</p>
+            </div>
+            <i class="fa-solid fa-circle-check text-xl text-slate-300 group-[.selected]:text-logistics-600"></i>
+          </div>
+        </button>
+      </div>
+
+      <!-- Custom Case Details -->
+      <div id="customCaseBox" class="hidden space-y-3 p-4 bg-slate-100 rounded-xl border border-slate-200">
+        <label class="block text-xs font-bold text-slate-700">Descreva o Problema Escolhido pelo Grupo:</label>
+        <textarea id="inputCustomCase" rows="3" placeholder="Ex: No terminal em que trabalho, temos grande perda de tempo na conferência manual de contêineres vazios..."
+          class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+          oninput="saveData()"></textarea>
+      </div>
+    </section>
+
+    <!-- ETAPA 2: EMPATIA -->
+    <section id="step-2" class="step-card hidden bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+          2
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Etapa 2: Empatia</h2>
+          <p class="text-xs text-slate-500">Slide 35 — Entendendo o ser humano no centro da operação</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            1. Quem é diretamente afetado por este problema? *
+          </label>
+          <input type="text" id="empatiQuem" placeholder="Ex: O operador de empilhadeira, o conferente ou o motorista do caminhão"
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            2. O que essa pessoa FAZ no seu dia a dia de trabalho? *
+          </label>
+          <textarea id="empatiFaz" rows="2" placeholder="Ex: Percorre o armazém com prancha na mão, procura caixas sem etiqueta clara e carrega volumes pesados..."
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            3. Qual a principal DIFICULDADE / FRUSTRAÇÃO enfrentada? *
+          </label>
+          <textarea id="empatiDificuldade" rows="2" placeholder="Ex: Perde mais de 20 minutos procurando o mesmo item e recebe reclamações de cobrança de meta..."
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            4. O que gera perda de tempo, esforço físico excessivo ou estresse? *
+          </label>
+          <textarea id="empatiDores" rows="2" placeholder="Ex: Sistema fora do ar, falta de sinalização nos corredores e layouts confusos..."
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETAPA 3: DEFINIÇÃO DO PROBLEMA -->
+    <section id="step-3" class="step-card hidden bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+          3
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Etapa 3: Definição do Problema</h2>
+          <p class="text-xs text-slate-500">Slide 36 — Construindo a Frase de Declaração Clara</p>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
+        <p class="font-bold text-slate-800"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Dica de Ouro:</p>
+        <p>Evite frases genéricas como "Falta de dinheiro" ou "O problema é que o sistema é ruim". Foque na dor real observada na operação!</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nosso problema é...</label>
+          <input type="text" id="defProblema" placeholder="Ex: o tempo excessivo de permanência dos caminhões"
+            class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="updateProblemStatement()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">porque afeta...</label>
+          <input type="text" id="defAfeta" placeholder="Ex: a produtividade das equipes de recepção e os motoristas"
+            class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="updateProblemStatement()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">gerando...</label>
+          <input type="text" id="defGerando" placeholder="Ex: alto custo com estadias de frota e filas na entrada do CD"
+            class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="updateProblemStatement()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">na situação de...</label>
+          <input type="text" id="defSituacao" placeholder="Ex: picos de chegada de mercadorias no início dos turnos"
+            class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="updateProblemStatement()">
+        </div>
+      </div>
+
+      <!-- Preview da Frase -->
+      <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-logistics-900 to-logistics-800 text-white space-y-2 shadow-md">
+        <span class="text-[10px] uppercase tracking-wider font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20">
+          Declaração Consolidada
+        </span>
+        <p class="text-sm sm:text-base leading-relaxed italic" id="problemStatementPreview">
+          "Nosso problema é [_____], porque afeta [_____], gerando [_____], na situação de [_____]."
+        </p>
+      </div>
+    </section>
+
+    <!-- ETAPA 4: IDEAÇÃO -->
+    <section id="step-4" class="step-card hidden bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+          4
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Etapa 4: Ideação</h2>
+          <p class="text-xs text-slate-500">Slide 37 — Brainstorming e Escolha da Melhora Solução</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+          Liste 3 Soluções Possíveis (Quantidade antes da Qualidade):
+        </p>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">💡 Solução 1:</label>
+          <input type="text" id="solucao1" placeholder="Ex: Implementar sinalização visual aérea por cores nos corredores"
+            class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">💡 Solução 2:</label>
+          <input type="text" id="solucao2" placeholder="Ex: Criar um aplicativo simples para agendamento de horários de doca"
+            class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">💡 Solução 3:</label>
+          <input type="text" id="solucao3" placeholder="Ex: Reorganizar a disposição de picking em zona de Curva ABC"
+            class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()">
+        </div>
+
+        <hr class="border-slate-100 my-4">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+            🏆 Qual solução o grupo ESCOLHEU para prototipar? *
+          </label>
+          <select id="solucaoEscolhidaSelect" onchange="saveData()" class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-logistics-500 outline-none font-medium">
+            <option value="">-- Selecione a Solução Escolhida --</option>
+            <option value="1">Solução 1</option>
+            <option value="2">Solução 2</option>
+            <option value="3">Solução 3</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            Por que esta solução é a melhor em Viabilidade, Custo e Facilidade? *
+          </label>
+          <textarea id="justificativaSolucao" rows="3" placeholder="Ex: Escolhemos a Solução 1 pois pode ser feita amanhã mesmo com fita adesiva amarela e baixo investimento, trazendo retorno imediato..."
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETAPA 5: PROTÓTIPO MULTIMODAL -->
+    <section id="step-5" class="step-card hidden bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+          5
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Etapa 5: Protótipo Multimodal</h2>
+          <p class="text-xs text-slate-500">Slide 38 — Escolha a forma mais fácil de registrar no celular</p>
+        </div>
+      </div>
+
+      <!-- TAB BUTTONS -->
+      <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-bold">
+        <button onclick="switchProtoTab('photo')" id="protoTabBtn-photo" class="py-2.5 px-2 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-camera"></i> <span class="hidden sm:inline">Foto do</span> Papel
+        </button>
+        <button onclick="switchProtoTab('steps')" id="protoTabBtn-steps" class="py-2.5 px-2 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-list-check"></i> Passo a Passo
+        </button>
+        <button onclick="switchProtoTab('draw')" id="protoTabBtn-draw" class="py-2.5 px-2 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-pen-nib"></i> Tela
+        </button>
+      </div>
+
+      <!-- OPTION 1: PHOTO OF PAPER -->
+      <div id="protoTab-photo" class="space-y-4">
+        <div class="p-4 bg-blue-50 border border-blue-200/80 rounded-xl text-xs text-blue-900 space-y-1">
+          <p class="font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-star text-amber-500"></i> Método Mais Recomendado em Grupo!
+          </p>
+          <p>O grupo desenha o layout/fluxo numa folha de papel e 1 aluno tira foto usando o celular abaixo:</p>
+        </div>
+
+        <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl p-6 bg-slate-50 hover:bg-slate-100/80 transition cursor-pointer text-center relative">
+          <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhotoUpload(event)"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+          <i class="fa-solid fa-cloud-arrow-up text-3xl text-logistics-600 mb-2"></i>
+          <p class="text-sm font-bold text-slate-700">Tirar Foto ou Escolher Imagem</p>
+          <p class="text-xs text-slate-500 mt-0.5">Clique aqui para abrir a câmera do celular</p>
+        </div>
+
+        <!-- Preview Image -->
+        <div id="protoPhotoPreviewContainer" class="hidden relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900">
+          <img id="protoPhotoPreview" src="" alt="Protótipo do Papel" class="w-full max-h-80 object-contain mx-auto">
+          <button onclick="removeProtoPhoto()" class="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- OPTION 2: TEXT STEPS / FLOW -->
+      <div id="protoTab-steps" class="hidden space-y-4">
+        <div class="flex justify-between items-center">
+          <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Etapas da Solução / Fluxo:</p>
+          <button onclick="addProtoStep()" class="text-xs font-bold bg-logistics-600 hover:bg-logistics-700 text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+            <i class="fa-solid fa-plus"></i> Adicionar Passo
+          </button>
+        </div>
+
+        <div id="protoStepsList" class="space-y-3">
+          <!-- Dynamic steps inserted here -->
+        </div>
+      </div>
+
+      <!-- OPTION 3: DIGITAL DRAWING -->
+      <div id="protoTab-draw" class="hidden space-y-3">
+        <div class="flex items-center justify-between gap-2 flex-wrap bg-slate-100 p-2 rounded-xl">
+          <!-- Tools -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="setCanvasTool('pen')" id="toolPen" class="px-2.5 py-1.5 bg-white shadow-sm rounded-lg text-xs font-bold text-slate-800">
+              <i class="fa-solid fa-pencil"></i> Lápis
+            </button>
+            <button onclick="setCanvasTool('eraser')" id="toolEraser" class="px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
+              <i class="fa-solid fa-eraser"></i> Borracha
+            </button>
+          </div>
+
+          <!-- Color palette -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="setCanvasColor('#1e293b')" class="w-6 h-6 rounded-full bg-slate-800 border-2 border-white shadow-sm"></button>
+            <button onclick="setCanvasColor('#2563eb')" class="w-6 h-6 rounded-full bg-blue-600 border-2 border-white shadow-sm"></button>
+            <button onclick="setCanvasColor('#dc2626')" class="w-6 h-6 rounded-full bg-red-600 border-2 border-white shadow-sm"></button>
+            <button onclick="setCanvasColor('#16a34a')" class="w-6 h-6 rounded-full bg-emerald-600 border-2 border-white shadow-sm"></button>
+          </div>
+
+          <button onclick="clearCanvas()" class="text-xs text-rose-600 font-bold px-2.5 py-1.5 hover:bg-rose-50 rounded-lg">
+            <i class="fa-solid fa-trash-can"></i> Limpar
+          </button>
+        </div>
+
+        <div class="border border-slate-300 rounded-2xl overflow-hidden bg-white shadow-inner relative">
+          <canvas id="protoCanvas" width="600" height="380" class="w-full h-64 sm:h-80 cursor-crosshair"></canvas>
+        </div>
+        <p class="text-[11px] text-slate-400 text-center">Desenhe com a ponta do dedo ou com o mouse no quadro acima.</p>
+      </div>
+    </section>
+
+    <!-- ETAPA 6: TESTE E MÉTRICAS -->
+    <section id="step-6" class="step-card hidden bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+          6
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Etapa 6: Teste e Métricas</h2>
+          <p class="text-xs text-slate-500">Slide 39 — Como validar e medir o impacto da solução</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            Como a solução seria testada na prática? (Piloto / Simulação) *
+          </label>
+          <textarea id="testePlano" rows="3" placeholder="Ex: Faremos um teste piloto de 3 dias no Corredor 4 do armazém, utilizando etiquetas coloridas temporárias e medindo o tempo de separação antes e depois..."
+            class="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-logistics-500 outline-none"
+            oninput="saveData()"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+            Principais Indicadores Logísticos de Sucesso (KPIs):
+          </label>
+
+          <div class="grid grid-cols-1 gap-2.5" id="kpiList">
+            <!-- KPI Item 1 -->
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <label class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer select-none">
+                <input type="checkbox" id="kpi-1" onchange="saveData()" class="w-4 h-4 rounded text-logistics-600 focus:ring-logistics-500">
+                ⏱️ Tempo de Ciclo / Lead Time
+              </label>
+              <input type="text" id="kpi-target-1" placeholder="Meta: ex: -30% do tempo" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg w-36 outline-none" oninput="saveData()">
+            </div>
+
+            <!-- KPI Item 2 -->
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <label class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer select-none">
+                <input type="checkbox" id="kpi-2" onchange="saveData()" class="w-4 h-4 rounded text-logistics-600 focus:ring-logistics-500">
+                🎯 Acuracidade de Estoque / Erros
+              </label>
+              <input type="text" id="kpi-target-2" placeholder="Meta: ex: 99.8% acurácia" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg w-36 outline-none" oninput="saveData()">
+            </div>
+
+            <!-- KPI Item 3 -->
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <label class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer select-none">
+                <input type="checkbox" id="kpi-3" onchange="saveData()" class="w-4 h-4 rounded text-logistics-600 focus:ring-logistics-500">
+                🚚 OTIF / Pontualidade na Entrega
+              </label>
+              <input type="text" id="kpi-target-3" placeholder="Meta: ex: elevar para 98%" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg w-36 outline-none" oninput="saveData()">
+            </div>
+
+            <!-- KPI Item 4 -->
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <label class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer select-none">
+                <input type="checkbox" id="kpi-4" onchange="saveData()" class="w-4 h-4 rounded text-logistics-600 focus:ring-logistics-500">
+                📍 Distância Percorrida / Rota
+              </label>
+              <input type="text" id="kpi-target-4" placeholder="Meta: ex: -500 metros/dia" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg w-36 outline-none" oninput="saveData()">
+            </div>
+
+            <!-- KPI Item 5 -->
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <label class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer select-none">
+                <input type="checkbox" id="kpi-5" onchange="saveData()" class="w-4 h-4 rounded text-logistics-600 focus:ring-logistics-500">
+                💔 Redução de Avarias / Perdas
+              </label>
+              <input type="text" id="kpi-target-5" placeholder="Meta: ex: zerar avarias" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg w-36 outline-none" oninput="saveData()">
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Step Wizard Nav -->
-        <div class="grid grid-cols-4 gap-2 text-center text-xs">
-          <div id="wizardStep1" class="py-2 rounded-lg bg-sky-500 text-white font-bold flex items-center justify-center gap-1.5 transition-all">
-            <span class="w-5 h-5 rounded-full bg-white/20 text-[10px] flex items-center justify-center">1</span>
-            <span class="hidden sm:inline">Curva ABC</span>
+    <!-- ETAPA 7: PITCH & EXPORTAÇÃO -->
+    <section id="step-7" class="step-card hidden bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 text-logistics-600 flex items-center justify-center font-bold text-xl">
+            7
           </div>
-          <div id="wizardStep2" class="py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all">
-            <span class="w-5 h-5 rounded-full bg-slate-700 text-[10px] flex items-center justify-center">2</span>
-            <span class="hidden sm:inline">Endereçamento</span>
-          </div>
-          <div id="wizardStep3" class="py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all">
-            <span class="w-5 h-5 rounded-full bg-slate-700 text-[10px] flex items-center justify-center">3</span>
-            <span class="hidden sm:inline">Metodologia 5S</span>
-          </div>
-          <div id="wizardStep4" class="py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all">
-            <span class="w-5 h-5 rounded-full bg-slate-700 text-[10px] flex items-center justify-center">4</span>
-            <span class="hidden sm:inline">Plano de Ação</span>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Etapa 7: Pitch & Apresentação</h2>
+            <p class="text-xs text-slate-500">Slide 40 — Apresente a solução do seu grupo em até 3 minutos</p>
           </div>
         </div>
       </div>
 
-      <!-- FASE 1: CURVA ABC -->
-      <section id="phase1Section" class="glass-card rounded-2xl p-5 sm:p-7 space-y-6">
-        
-        <!-- Concept Box Cebrac Style -->
-        <div class="bg-slate-900/80 border-l-4 border-amber-500 p-4 rounded-r-xl space-y-2">
-          <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
-            <i class="fa-solid fa-lightbulb"></i>
-            <span>Lembrete Rápido de Logística • Regra da Curva ABC (Pareto):</span>
+      <!-- TIMER DE APRESENTAÇÃO -->
+      <div class="p-4 rounded-2xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg no-print">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-accent-500/20 text-accent-500 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-stopwatch"></i>
           </div>
-          <ul class="text-xs sm:text-sm text-slate-300 space-y-1 ml-1">
-            <li>• <strong class="text-emerald-400">Classe A:</strong> Produtos com <strong>MAIOR Valor Total Movimentado</strong> (R$). Merecem controle rigoroso e localização nobre no galpão.</li>
-            <li>• <strong class="text-sky-400">Classe B:</strong> Produtos com <strong>Valor Intermediário</strong> (R$). Exigem controle moderado de giro.</li>
-            <li>• <strong class="text-purple-400">Classe C:</strong> Produtos com <strong>MENOR Valor Total Movimentado</strong> (R$). Representam maior quantidade de itens, mas baixo valor financeiro acumulado.</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
-            <i class="fa-solid fa-calculator text-sky-400 me-2"></i> Análise de Estoque Recebido
-          </h3>
-          <p class="text-xs sm:text-sm text-slate-400">
-            Observe o <strong>Valor Total Movimentado (R$)</strong> de cada produto do seu lote e selecione a <strong>Classe A, B ou C</strong> correspondente para cada item.
-          </p>
-        </div>
-
-        <!-- Table of generated items -->
-        <div class="overflow-x-auto rounded-xl border border-slate-700/80">
-          <table class="w-full text-left text-xs sm:text-sm text-slate-200">
-            <thead class="bg-slate-900/90 uppercase text-[11px] text-slate-400 tracking-wider border-b border-slate-700">
-              <tr>
-                <th scope="col" class="py-3 px-4">Item de Estoque</th>
-                <th scope="col" class="py-3 px-4 text-center">Demanda (Unid)</th>
-                <th scope="col" class="py-3 px-4 text-right">Valor Unitário</th>
-                <th scope="col" class="py-3 px-4 text-right font-bold text-amber-400">Valor Total Movimentado</th>
-                <th scope="col" class="py-3 px-4 text-center min-w-[150px]">Classificação ABC</th>
-              </tr>
-            </thead>
-            <tbody id="abcTableBody" class="divide-y divide-slate-800 bg-slate-900/40">
-              <!-- Dynamically populated via JS -->
-            </tbody>
-          </table>
-        </div>
-
-        <div class="flex justify-end pt-2">
-          <button 
-            onclick="validatePhase1()"
-            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 text-sm"
-          >
-            <span>Confirmar Curva ABC e Avançar</span>
-            <i class="fa-solid fa-arrow-right"></i>
-          </button>
-        </div>
-      </section>
-
-      <!-- FASE 2: ENDEREÇAMENTO E ARMAZENAGEM -->
-      <section id="phase2Section" class="hidden glass-card rounded-2xl p-5 sm:p-7 space-y-6">
-        
-        <div class="bg-slate-900/80 border-l-4 border-sky-500 p-4 rounded-r-xl space-y-1">
-          <div class="flex items-center gap-2 text-sky-400 font-bold text-sm">
-            <i class="fa-solid fa-map-location-dot"></i>
-            <span>Princípio da Armazenagem Inteligente:</span>
-          </div>
-          <p class="text-xs sm:text-sm text-slate-300">
-            Para reduzir o tempo de movimentação (Picking) e otimizar as rotas internas, os itens da <strong>Classe A</strong> devem ser guardados próximos à Doca de Expedição/Entrada. Itens <strong>Classe B</strong> nas posições intermediárias e itens <strong>Classe C</strong> no fundo ou niveis superiores.
-          </p>
-        </div>
-
-        <div>
-          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
-            <i class="fa-solid fa-warehouse text-amber-400 me-2"></i> Organização das Prateleiras e Corredores
-          </h3>
-          <p class="text-xs sm:text-sm text-slate-400">
-            Escolha para qual <strong>Zona do Galpão</strong> cada produto do seu estoque deve ser direcionado:
-          </p>
-        </div>
-
-        <!-- Interactive Layout Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <!-- Zone 1 -->
-          <div class="bg-slate-900/80 p-4 rounded-xl border border-emerald-500/30 relative">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold uppercase text-emerald-400">Zona 1: Doca & Expedição</span>
-              <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/20">Acesso Rápido</span>
-            </div>
-            <p class="text-[11px] text-slate-400">Destinada a itens de ALTISSIMO giro e alto valor movimentado (Classe A).</p>
-          </div>
-
-          <!-- Zone 2 -->
-          <div class="bg-slate-900/80 p-4 rounded-xl border border-sky-500/30 relative">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold uppercase text-sky-400">Zona 2: Corredores Médios</span>
-              <span class="bg-sky-500/10 text-sky-400 text-[10px] font-bold px-2 py-0.5 rounded border border-sky-500/20">Acesso Intermediário</span>
-            </div>
-            <p class="text-[11px] text-slate-400">Destinada a itens de giro intermediário (Classe B).</p>
-          </div>
-
-          <!-- Zone 3 -->
-          <div class="bg-slate-900/80 p-4 rounded-xl border border-purple-500/30 relative">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold uppercase text-purple-400">Zona 3: Fundos & Aéreo</span>
-              <span class="bg-purple-500/10 text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded border border-purple-500/20">Acesso Secundário</span>
-            </div>
-            <p class="text-[11px] text-slate-400">Destinada a itens de menor rotação e menor valor acumulado (Classe C).</p>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400">Cronômetro do Pitch</span>
+            <div id="timerDisplay" class="text-2xl font-black tracking-wider text-amber-400">03:00</div>
           </div>
         </div>
 
-        <!-- Address Selection List -->
-        <div id="addressingList" class="space-y-3">
-          <!-- Dynamically generated -->
-        </div>
-
-        <div class="flex justify-between items-center pt-4 border-t border-slate-800">
-          <button 
-            onclick="goToPhase(1)"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition-all"
-          >
-            <i class="fa-solid fa-arrow-left me-1"></i> Voltar Fase 1
+        <div class="flex items-center gap-2">
+          <button onclick="toggleTimer()" id="timerToggleBtn" class="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-play"></i> Iniciar
           </button>
-          
-          <button 
-            onclick="validatePhase2()"
-            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 text-sm"
-          >
-            <span>Salvar Endereçamento e Avançar</span>
-            <i class="fa-solid fa-arrow-right"></i>
+          <button onclick="resetTimer()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">
+            <i class="fa-solid fa-rotate-left"></i>
           </button>
         </div>
-      </section>
+      </div>
 
-      <!-- FASE 3: METODOLOGIA 5S NA LOGÍSTICA -->
-      <section id="phase3Section" class="hidden glass-card rounded-2xl p-5 sm:p-7 space-y-6">
-        <div>
-          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
-            <i class="fa-solid fa-broom text-purple-400 me-2"></i> Diagnóstico e Metodologia 5S no Galpão
-          </h3>
-          <p class="text-xs sm:text-sm text-slate-400">
-            Relacione o problema encontrado na rotina logística ao Senso (S) correto da Metodologia 5S para solucioná-lo.
-          </p>
+      <!-- DASHBOARD / PITCH CONSOLIDADO -->
+      <div id="pitchDashboard" class="space-y-4 p-5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 card-print">
+        <div class="flex justify-between items-start border-b border-slate-200 pb-3">
+          <div>
+            <h3 class="font-extrabold text-logistics-900 text-base" id="dashTurma">Turma: Não informada</h3>
+            <p class="text-xs font-semibold text-slate-600" id="dashIntegrantes">Integrantes: Não informados</p>
+          </div>
+          <span class="text-[10px] font-extrabold uppercase bg-logistics-100 text-logistics-800 px-2.5 py-1 rounded-md">Resumo do Pitch</span>
         </div>
 
-        <!-- 5S Scenarios Grid -->
-        <div id="fiveSContainer" class="space-y-4">
-          <!-- Dynamically populated via JS -->
-        </div>
-
-        <div class="flex justify-between items-center pt-4 border-t border-slate-800">
-          <button 
-            onclick="goToPhase(2)"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition-all"
-          >
-            <i class="fa-solid fa-arrow-left me-1"></i> Voltar Fase 2
-          </button>
-          
-          <button 
-            onclick="validatePhase3()"
-            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 text-sm"
-          >
-            <span>Avançar para o Plano de Ação</span>
-            <i class="fa-solid fa-arrow-right"></i>
-          </button>
-        </div>
-      </section>
-
-      <!-- FASE 4: PLANO DE AÇÃO E PRIORIDADES -->
-      <section id="phase4Section" class="hidden glass-card rounded-2xl p-5 sm:p-7 space-y-6">
-        <div>
-          <h3 class="text-base sm:text-lg font-bold text-white mb-1">
-            <i class="fa-solid fa-list-check text-amber-400 me-2"></i> Sequenciamento Lógico de Reorganização
-          </h3>
-          <p class="text-xs sm:text-sm text-slate-400">
-            Ordene as etapas abaixo da <strong>1ª Ação (Mais urgente)</strong> até a <strong>4ª Ação</strong> para reestruturar com sucesso a operação do galpão.
-          </p>
-        </div>
-
-        <!-- Priority Ordering Container -->
-        <div id="actionPlanContainer" class="space-y-3">
-          <!-- Dynamically populated drag or re-order controls -->
-        </div>
-
-        <div class="flex justify-between items-center pt-4 border-t border-slate-800">
-          <button 
-            onclick="goToPhase(3)"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition-all"
-          >
-            <i class="fa-solid fa-arrow-left me-1"></i> Voltar Fase 3
-          </button>
-          
-          <button 
-            onclick="finalizeGame()"
-            class="bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-white font-extrabold py-3.5 px-7 rounded-xl shadow-xl shadow-emerald-600/25 transition-all flex items-center gap-2 text-sm transform active:scale-95"
-          >
-            <i class="fa-solid fa-flag-checkered text-lg"></i>
-            <span>Finalizar Desafio e Ver Resultado</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- FINAL STEP: DASHBOARD DE RESULTADOS E COMPROVAÇÃO DE PROVA -->
-      <section id="finalResultsSection" class="hidden space-y-6">
-        
-        <!-- CERTIFICATE / SUMMARY CARD (PRINTABLE) -->
-        <div id="certificateCard" class="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border border-slate-700 print-card">
-          
-          <!-- Header Certificate -->
-          <div class="border-b border-slate-700 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div class="inline-flex items-center gap-2 bg-sky-500/10 text-sky-400 text-xs font-bold px-3 py-1 rounded-full border border-sky-500/20 mb-2">
-                <i class="fa-solid fa-award"></i> RELATÓRIO DE DESEMPENHO LOGÍSTICO
-              </div>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Comprovante do Gestor Logístico</h2>
-              <p class="text-xs sm:text-sm text-slate-400">Operação Resgate de Estoque • Curso Técnico Cebrac</p>
-            </div>
-
-            <!-- Authentic Hash Stamp -->
-            <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-center sm:text-right shrink-0">
-              <span class="text-[10px] text-slate-500 block uppercase font-mono">Código de Validação Único</span>
-              <span id="finalAuthHash" class="text-sm font-mono font-bold text-amber-400">LOG-00000000</span>
-              <span id="finalTimestamp" class="text-[10px] text-slate-400 block mt-0.5">00/00/0000 às 00:00</span>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">1. Desafio Escolhido</span>
+            <p class="font-bold text-slate-800" id="dashDesafio">-</p>
           </div>
 
-          <!-- Student Meta Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-            <div>
-              <span class="text-xs text-slate-400 block">Nome do Aluno(a):</span>
-              <strong id="finalStudentName" class="text-base text-white font-bold block">--</strong>
-            </div>
-            <div>
-              <span class="text-xs text-slate-400 block">Data de Nascimento:</span>
-              <strong id="finalStudentDob" class="text-base text-white font-bold block">--/--/----</strong>
-            </div>
+          <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">2. Usuário Afetado (Empatia)</span>
+            <p class="font-bold text-slate-800" id="dashUsuario">-</p>
           </div>
-
-          <!-- Dynamic Final Grade KPI Block -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            
-            <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-xl border border-slate-700 text-center flex flex-col justify-center items-center">
-              <span class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Nota Final</span>
-              <span id="finalGrade" class="text-4xl font-extrabold text-emerald-400">10,0</span>
-              <span id="finalStatusText" class="text-[11px] font-semibold text-slate-300 mt-1">Aprovado com Excelência</span>
-            </div>
-
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-center items-center">
-              <i class="fa-solid fa-bullseye text-sky-400 text-xl mb-1"></i>
-              <span class="text-xs text-slate-400">Acuracidade Estoque</span>
-              <span id="kpiAccuracy" class="text-xl font-bold text-white mt-1">100%</span>
-              <span class="text-[10px] text-emerald-400 mt-0.5">Divergências ZERADAS</span>
-            </div>
-
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-center items-center">
-              <i class="fa-solid fa-stopwatch text-amber-400 text-xl mb-1"></i>
-              <span class="text-xs text-slate-400">Tempo de Picking</span>
-              <span id="kpiPicking" class="text-xl font-bold text-white mt-1">-38%</span>
-              <span class="text-[10px] text-sky-400 mt-0.5">Rotas Otimizadas</span>
-            </div>
-
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-center items-center">
-              <i class="fa-solid fa-truck-fast text-purple-400 text-xl mb-1"></i>
-              <span class="text-xs text-slate-400">Nível OTIF</span>
-              <span id="kpiOtif" class="text-xl font-bold text-white mt-1">99,4%</span>
-              <span class="text-[10px] text-emerald-400 mt-0.5">Entregas no Prazo</span>
-            </div>
-          </div>
-
-          <!-- Breakdown Phase Summary -->
-          <div class="space-y-3 pt-2">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">
-              <i class="fa-solid fa-list-check me-1 text-sky-400"></i> Desempenho Detalhado por Etapa:
-            </h4>
-            
-            <div id="phaseBreakdown" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <!-- Dynamically rendered -->
-            </div>
-          </div>
-
-          <!-- Evaluation Feedback Message -->
-          <div id="feedbackBox" class="bg-slate-900/90 p-4 rounded-xl border border-slate-700 text-xs text-slate-300 leading-relaxed">
-            <!-- Dynamic feedback -->
-          </div>
-
         </div>
 
-        <!-- ACTION BUTTONS (WHATSAPP, PRINT, RESTART) - NO PRINT -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 no-print">
-          
-          <!-- Copy for WhatsApp -->
-          <button 
-            onclick="copyWhatsAppSummary()"
-            class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 text-sm"
-          >
-            <i class="fa-brands fa-whatsapp text-lg"></i>
-            <span>Copiar Resumo para WhatsApp / Moodle</span>
-          </button>
-
-          <!-- Print / Save PDF -->
-          <button 
-            onclick="window.print()"
-            class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-sky-600/20 transition-all flex items-center justify-center gap-2 text-sm"
-          >
-            <i class="fa-solid fa-print text-lg"></i>
-            <span>Imprimir / Salvar em PDF</span>
-          </button>
-
-          <!-- Restart Button -->
-          <button 
-            onclick="resetGame()"
-            class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-3.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
-          >
-            <i class="fa-solid fa-rotate-right"></i>
-            <span>Refazer Atividade</span>
-          </button>
+        <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1 text-xs">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">3. Declaração do Problema</span>
+          <p class="font-semibold text-slate-800 italic" id="dashProblemaFrase">-</p>
         </div>
 
-      </section>
+        <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1 text-xs">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">4. Solução Escolhida & Justificativa</span>
+          <p class="font-bold text-logistics-700" id="dashSolucaoNome">-</p>
+          <p class="text-slate-600" id="dashSolucaoJustificativa">-</p>
+        </div>
 
-    </div>
+        <!-- Protótipo Display -->
+        <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-2 text-xs">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">5. Visualização do Protótipo</span>
+          <div id="dashProtoView" class="pt-1">
+            <p class="text-slate-400 italic">Nenhum protótipo registrado ainda.</p>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1 text-xs">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">6. Validação e KPIs de Sucesso</span>
+          <p class="text-slate-700" id="dashTestePlano">-</p>
+          <div id="dashKpisList" class="flex flex-wrap gap-1.5 pt-1">
+            <!-- KPIs Badge -->
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPORT ACTIONS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 no-print">
+        <button onclick="sendToWhatsApp()" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Enviar Resumo via WhatsApp
+        </button>
+
+        <button onclick="window.print()" class="w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-print"></i> Imprimir / Salvar PDF
+        </button>
+      </div>
+    </section>
+
   </main>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-slate-800 bg-slate-900/60 py-4 text-center text-xs text-slate-500 no-print">
-    <div class="max-w-6xl mx-auto px-4">
-      <p>Operação Resgate de Estoque • Material Didático Interativo de Logística - Cebrac</p>
+  <!-- FOOTER / NAVIGATION BAR -->
+  <footer class="sticky bottom-0 z-40 bg-white border-t border-slate-200 py-3 px-4 shadow-lg no-print">
+    <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
+      <button onclick="changeStep(-1)" id="btnPrev" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-chevron-left"></i> Anterior
+      </button>
+
+      <span class="text-xs font-extrabold text-slate-500" id="footerStepIndicator">1 / 8</span>
+
+      <button onclick="changeStep(1)" id="btnNext" class="px-5 py-2.5 rounded-xl bg-logistics-600 hover:bg-logistics-700 text-white font-bold text-xs shadow-md shadow-logistics-600/20 transition flex items-center gap-1.5">
+        Próximo <i class="fa-solid fa-chevron-right"></i>
+      </button>
     </div>
   </footer>
 
   <script>
-    /* =========================================================================
-       LOGISTICS APPLICATION STATE & DETERMINISTIC SEED PRNG
-       ========================================================================= */
+    /* STATE MANAGEMENT */
+    let currentStep = 0;
+    const totalSteps = 7;
 
-    let studentData = {
-      name: '',
-      dob: '',
-      seed: 0,
-      hashStr: ''
+    let appData = {
+      turma: '',
+      integrantes: '',
+      selectedCaseIndex: null,
+      customCase: '',
+      empatia: { quem: '', faz: '', dificuldade: '', dores: '' },
+      definicao: { problema: '', afeta: '', gerando: '', situacao: '' },
+      ideacao: { s1: '', s2: '', s3: '', escolhida: '', justificativa: '' },
+      prototipo: {
+        activeTab: 'photo',
+        photoDataUrl: '',
+        steps: [
+          { title: 'Passo 1: Identificação', desc: 'Sinalizar área afetada' },
+          { title: 'Passo 2: Movimentação', desc: 'Reorganizar o fluxo' }
+        ],
+        canvasDataUrl: ''
+      },
+      teste: {
+        plano: '',
+        kpis: {}
+      }
     };
 
-    let generatedItems = [];
-    let phaseScores = {
-      p1: 0,
-      p2: 0,
-      p3: 0,
-      p4: 0
+    /* CASES LIST */
+    const casesList = [
+      { id: 0, title: "Desafio Personalizado", desc: "Criado pelo grupo" },
+      { id: 1, title: "Picking e-commerce com alto tempo de busca", desc: "Erros de separação e rotas longas" },
+      { id: 2, title: "Avarias constantes em cargas fracionadas", desc: "Danos durante o transporte rodoviário" },
+      { id: 3, title: "Gargalo e fila de caminhões na doca", desc: "Demora para descarregar e pagamento de estadias" },
+      { id: 4, title: "Atrasos e erros no faturamento de pedidos", desc: "Inconsistências de dados entre compras e expedição" },
+      { id: 5, title: "Desperdício por falta de FIFO/PEPS", desc: "Estoque antigo retido no fundo de prateleiras" }
+    ];
+
+    /* ON PAGE LOAD */
+    window.onload = function() {
+      loadSavedData();
+      initCanvas();
+      renderProtoSteps();
+      updateStepUI();
     };
 
-    let userAnswers = {
-      abc: {},
-      addressing: {},
-      fiveS: {},
-      actionPlanOrder: [1, 2, 3, 4]
-    };
-
-    // Mulberry32 Deterministic PRNG Generator
-    function seedFromString(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0;
-      }
-      return Math.abs(hash);
-    }
-
-    function createPRNG(seed) {
-      return function() {
-        var t = seed += 0x6D2B79F5;
-        t = Math.imul(t ^ t >>> 15, t | 1);
-        t ^= t + Math.imul(t ^ t >>> 8, t | 61);
-        return ((t ^ t >>> 14) >>> 0) / 4294967296;
-      };
-    }
-
-    // Date Mask DD/MM/AAAA
-    function maskDate(input) {
-      let value = input.value.replace(/\D/g, ""); // Keep only digits
-      if (value.length > 8) value = value.substring(0, 8);
-
-      if (value.length > 4) {
-        input.value = `${value.substring(0, 2)}/${value.substring(2, 4)}/${value.substring(4)}`;
-      } else if (value.length > 2) {
-        input.value = `${value.substring(0, 2)}/${value.substring(2)}`;
-      } else {
-        input.value = value;
+    /* NAVIGATION LOGIC */
+    function changeStep(delta) {
+      const newStep = currentStep + delta;
+      if (newStep >= 0 && newStep <= totalSteps) {
+        currentStep = newStep;
+        updateStepUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 
-    // Custom Toast Notification System (replaces alert)
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
-
-      toastMsg.innerText = message;
-
-      if (type === 'error') {
-        toastIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-red-500/20 text-red-400 border border-red-500/30';
-        toastIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-      } else if (type === 'success') {
-        toastIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-        toastIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-      } else {
-        toastIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-sky-500/20 text-sky-400 border border-sky-500/30';
-        toastIcon.innerHTML = '<i class="fa-solid fa-info"></i>';
+    function updateStepUI() {
+      // Hide all step cards
+      for (let i = 0; i <= totalSteps; i++) {
+        const el = document.getElementById(`step-${i}`);
+        if (el) el.classList.add('hidden');
       }
 
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
+      // Show active card
+      const activeEl = document.getElementById(`step-${currentStep}`);
+      if (activeEl) activeEl.classList.remove('hidden');
 
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3500);
-    }
+      // Update progress bar
+      const pct = Math.round((currentStep / totalSteps) * 100);
+      document.getElementById('progressBar fill').style.width = `${pct}%`;
+      document.getElementById('stepCounterText').innerText = `Etapa ${currentStep} de ${totalSteps}`;
 
-    // Handle Registration Submit
-    function handleRegistration(e) {
-      e.preventDefault();
-      const nameInput = document.getElementById('inputName').value.trim();
-      const dobInput = document.getElementById('inputDob').value.trim();
-
-      if (!nameInput || nameInput.length < 3) {
-        showToast('Por favor, informe seu nome completo.', 'error');
-        return;
-      }
-
-      if (dobInput.length < 10) {
-        showToast('Por favor, informe a data de nascimento completa no formato DD/MM/AAAA.', 'error');
-        return;
-      }
-
-      // Set Student State
-      studentData.name = nameInput;
-      studentData.dob = dobInput;
-      
-      const cleanKey = (nameInput.toLowerCase() + dobInput.replace(/\D/g, '')).replace(/\s+/g, '');
-      studentData.seed = seedFromString(cleanKey);
-      
-      // Hash Code
-      const hashHex = (studentData.seed.toString(16) + '8a9b2c').substring(0, 8).toUpperCase();
-      studentData.hashStr = `LOG-${hashHex}`;
-
-      // Update Header Badges
-      document.getElementById('headerStudentName').innerText = nameInput;
-      document.getElementById('headerStudentDob').innerText = dobInput;
-      document.getElementById('studentBadgeHeader').classList.remove('hidden');
-      document.getElementById('studentBadgeHeader').classList.add('flex');
-      document.getElementById('seedBadge').innerText = `#${hashHex}`;
-
-      // Generate items based on seed
-      generateUniqueInventory(studentData.seed);
-
-      // Transition Screen
-      document.getElementById('stepRegistration').classList.add('hidden');
-      document.getElementById('gameContainer').classList.remove('hidden');
-
-      // Build Phase 1 & Phase 2
-      renderPhase1Table();
-      renderPhase2Addressing();
-      renderPhase3FiveS();
-      renderPhase4ActionPlan();
-
-      goToPhase(1);
-      showToast(`Bem-vindo(a), ${nameInput.split(' ')[0]}! Seu desafio foi gerado.`, 'success');
-    }
-
-    // Inventory Data Pool Generator
-    function generateUniqueInventory(seed) {
-      const prng = createPRNG(seed);
-
-      const catalogPool = [
-        { name: "Caixas de Papelão 50x50", baseDemand: 1200, basePrice: 4.50 },
-        { name: "Paletes de Madeira PBR", baseDemand: 450, basePrice: 65.00 },
-        { name: "Empilhadeira Elétrica - Peças", baseDemand: 15, basePrice: 1850.00 },
-        { name: "Fita Adesiva Industrial 45mm", baseDemand: 2200, basePrice: 3.20 },
-        { name: "Etiquetas Código de Barras (Rolo)", baseDemand: 3500, basePrice: 1.80 },
-        { name: "Filme Stretch 500mm 10kg", baseDemand: 300, basePrice: 78.00 },
-        { name: "Caixas Plásticas Organizadoras", baseDemand: 180, basePrice: 42.00 },
-        { name: "Bobinas de Plástico Bolha", baseDemand: 90, basePrice: 110.00 },
-        { name: "Lanternas e Baterias de Galpão", baseDemand: 60, basePrice: 25.00 },
-        { name: "Conectores de Aço Racks", baseDemand: 800, basePrice: 8.50 }
+      // Update titles
+      const stepTitles = [
+        "Orientações & Grupo", "O Desafio", "Empatia", "Definição do Problema",
+        "Ideação", "Protótipo", "Teste & Métricas", "Pitch & Exportação"
       ];
+      document.getElementById('stepTitleHeader').innerText = stepTitles[currentStep];
+      document.getElementById('footerStepIndicator').innerText = `${currentStep + 1} / ${totalSteps + 1}`;
 
-      // Shuffle pool deterministically
-      const shuffled = [...catalogPool].sort(() => prng() - 0.5);
+      // Navigation buttons enable/disable
+      document.getElementById('btnPrev').disabled = (currentStep === 0);
       
-      // Select 6 items
-      const selected = shuffled.slice(0, 6);
+      const btnNext = document.getElementById('btnNext');
+      if (currentStep === totalSteps) {
+        btnNext.innerHTML = `<i class="fa-solid fa-check-double"></i> Concluído`;
+      } else {
+        btnNext.innerHTML = `Próximo <i class="fa-solid fa-chevron-right"></i>`;
+      }
 
-      // Customize numbers slightly per student with PRNG
-      generatedItems = selected.map((item, index) => {
-        const demandVar = Math.floor((prng() * 0.4 + 0.8) * item.baseDemand);
-        const priceVar = parseFloat(((prng() * 0.3 + 0.85) * item.basePrice).toFixed(2));
-        const totalValue = parseFloat((demandVar * priceVar).toFixed(2));
+      // Refresh Dashboard if on Etapa 7
+      if (currentStep === 7) {
+        renderDashboard();
+      }
+    }
 
-        return {
-          id: `item_${index + 1}`,
-          name: item.name,
-          demand: demandVar,
-          unitPrice: priceVar,
-          totalValue: totalValue
-        };
-      });
+    /* DATA SAVING & LOADING */
+    function saveData() {
+      // Etapa 0
+      appData.turma = document.getElementById('inputTurma').value;
+      appData.integrantes = document.getElementById('inputIntegrantes').value;
 
-      // Determine correct ABC Classes based on total monetary ranking
-      // Sort copy descending
-      const sortedByValue = [...generatedItems].sort((a, b) => b.totalValue - a.totalValue);
+      // Header group name label
+      const groupLabel = appData.turma ? appData.turma : (appData.integrantes ? appData.integrantes.split(',')[0] : 'Grupo não definido');
+      document.getElementById('headerGroupLabel').innerText = groupLabel;
+
+      // Etapa 1
+      appData.customCase = document.getElementById('inputCustomCase').value;
+
+      // Etapa 2
+      appData.empatia.quem = document.getElementById('empatiQuem').value;
+      appData.empatia.faz = document.getElementById('empatiFaz').value;
+      appData.empatia.dificuldade = document.getElementById('empatiDificuldade').value;
+      appData.empatia.dores = document.getElementById('empatiDores').value;
+
+      // Etapa 3
+      appData.definicao.problema = document.getElementById('defProblema').value;
+      appData.definicao.afeta = document.getElementById('defAfeta').value;
+      appData.definicao.gerando = document.getElementById('defGerando').value;
+      appData.definicao.situacao = document.getElementById('defSituacao').value;
+
+      // Etapa 4
+      appData.ideacao.s1 = document.getElementById('solucao1').value;
+      appData.ideacao.s2 = document.getElementById('solucao2').value;
+      appData.ideacao.s3 = document.getElementById('solucao3').value;
+      appData.ideacao.escolhida = document.getElementById('solucaoEscolhidaSelect').value;
+      appData.ideacao.justificativa = document.getElementById('justificativaSolucao').value;
+
+      // Etapa 6
+      appData.teste.plano = document.getElementById('testePlano').value;
       
-      // Top 2 items -> Classe A
-      // Next 2 items -> Classe B
-      // Last 2 items -> Classe C
-      sortedByValue.forEach((item, idx) => {
-        let correctClass = 'C';
-        let zone = 'Zona 3 (Fundos/Aéreo)';
-        if (idx < 2) {
-          correctClass = 'A';
-          zone = 'Zona 1 (Doca/Expedição)';
-        } else if (idx < 4) {
-          correctClass = 'B';
-          zone = 'Zona 2 (Corredores Médios)';
+      for (let i = 1; i <= 5; i++) {
+        const chk = document.getElementById(`kpi-${i}`);
+        const target = document.getElementById(`kpi-target-${i}`);
+        if (chk) {
+          appData.teste.kpis[i] = {
+            checked: chk.checked,
+            target: target ? target.value : ''
+          };
+        }
+      }
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('dt_logistica_data', JSON.stringify(appData));
+        showSaveBadge();
+      } catch (e) {
+        console.error('Erro ao salvar no localStorage', e);
+      }
+    }
+
+    function loadSavedData() {
+      const saved = localStorage.getItem('dt_logistica_data');
+      if (!saved) return;
+
+      try {
+        appData = JSON.parse(saved);
+
+        // Populate fields
+        document.getElementById('inputTurma').value = appData.turma || '';
+        document.getElementById('inputIntegrantes').value = appData.integrantes || '';
+
+        if (appData.selectedCaseIndex !== null && appData.selectedCaseIndex !== undefined) {
+          selectCase(appData.selectedCaseIndex);
+        }
+        document.getElementById('inputCustomCase').value = appData.customCase || '';
+
+        document.getElementById('empatiQuem').value = appData.empatia.quem || '';
+        document.getElementById('empatiFaz').value = appData.empatia.faz || '';
+        document.getElementById('empatiDificuldade').value = appData.empatia.dificuldade || '';
+        document.getElementById('empatiDores').value = appData.empatia.dores || '';
+
+        document.getElementById('defProblema').value = appData.definicao.problema || '';
+        document.getElementById('defAfeta').value = appData.definicao.afeta || '';
+        document.getElementById('defGerando').value = appData.definicao.gerando || '';
+        document.getElementById('defSituacao').value = appData.definicao.situacao || '';
+        updateProblemStatement();
+
+        document.getElementById('solucao1').value = appData.ideacao.s1 || '';
+        document.getElementById('solucao2').value = appData.ideacao.s2 || '';
+        document.getElementById('solucao3').value = appData.ideacao.s3 || '';
+        document.getElementById('solucaoEscolhidaSelect').value = appData.ideacao.escolhida || '';
+        document.getElementById('justificativaSolucao').value = appData.ideacao.justificativa || '';
+
+        // Prototyping
+        if (appData.prototipo) {
+          if (appData.prototipo.photoDataUrl) {
+            document.getElementById('protoPhotoPreview').src = appData.prototipo.photoDataUrl;
+            document.getElementById('protoPhotoPreviewContainer').classList.remove('hidden');
+          }
+          if (appData.prototipo.activeTab) {
+            switchProtoTab(appData.prototipo.activeTab);
+          }
         }
 
-        // Assign correct answer back to item in generatedItems
-        const target = generatedItems.find(i => i.id === item.id);
-        target.correctClass = correctClass;
-        target.correctZone = zone;
-      });
-    }
+        document.getElementById('testePlano').value = appData.teste.plano || '';
+        if (appData.teste.kpis) {
+          for (let i = 1; i <= 5; i++) {
+            if (appData.teste.kpis[i]) {
+              document.getElementById(`kpi-${i}`).checked = appData.teste.kpis[i].checked || false;
+              document.getElementById(`kpi-target-${i}`).value = appData.teste.kpis[i].target || '';
+            }
+          }
+        }
 
-    function renderPhase1Table() {
-      const tbody = document.getElementById('abcTableBody');
-      tbody.innerHTML = '';
-
-      generatedItems.forEach((item) => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/50 transition-colors';
-
-        tr.innerHTML = `
-          <td class="py-3 px-4 font-semibold text-white">
-            <i class="fa-solid fa-box text-slate-500 me-2"></i>${item.name}
-          </td>
-          <td class="py-3 px-4 text-center font-mono">${item.demand.toLocaleString('pt-BR')} un</td>
-          <td class="py-3 px-4 text-right font-mono">R$ ${item.unitPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-          <td class="py-3 px-4 text-right font-mono font-bold text-amber-400">
-            R$ ${item.totalValue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-          </td>
-          <td class="py-3 px-4 text-center">
-            <select 
-              id="select_abc_${item.id}" 
-              onchange="userAnswers.abc['${item.id}'] = this.value"
-              class="bg-slate-800 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-full max-w-[160px]"
-            >
-              <option value="">[ Selecionar ]</option>
-              <option value="A">Classe A (Alto Valor)</option>
-              <option value="B">Classe B (Médio Valor)</option>
-              <option value="C">Classe C (Baixo Valor)</option>
-            </select>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderPhase2Addressing() {
-      const container = document.getElementById('addressingList');
-      container.innerHTML = '';
-
-      generatedItems.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3';
-        
-        card.innerHTML = `
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-amber-400 font-bold shrink-0">
-              <i class="fa-solid fa-location-dot text-xs"></i>
-            </div>
-            <div>
-              <span class="text-sm font-semibold text-white block">${item.name}</span>
-              <span class="text-[11px] text-slate-400">Total Movimentado: R$ ${item.totalValue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-            </div>
-          </div>
-
-          <div class="w-full sm:w-auto">
-            <select 
-              id="select_zone_${item.id}" 
-              onchange="userAnswers.addressing['${item.id}'] = this.value"
-              class="bg-slate-800 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none w-full sm:w-64"
-            >
-              <option value="">[ Selecionar Endereçamento ]</option>
-              <option value="Zona 1 (Doca/Expedição)">Zona 1: Próximo à Doca / Expedição</option>
-              <option value="Zona 2 (Corredores Médios)">Zona 2: Corredores Intermediários</option>
-              <option value="Zona 3 (Fundos/Aéreo)">Zona 3: Fundos / Prateleiras Altas</option>
-            </select>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    const fiveSData = [
-      {
-        id: '5s_1',
-        title: 'Cenário 1: Caixas rasgadas e paletes velhos na doca',
-        desc: 'Excesso de material danificado e lixo entulhado bloqueando a passagem de empilhadeiras.',
-        options: [
-          { val: 'Seiri', label: '1º S - Seiri (Senso de Utilização / Descarte de Obsoletos)' },
-          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização / Vagas no Piso)' },
-          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza)' },
-          { val: 'Shitsuke', label: '5º S - Shitsuke (Senso de Disciplina)' }
-        ],
-        correct: 'Seiri'
-      },
-      {
-        id: '5s_2',
-        title: 'Cenário 2: Ferramentas e estiletes espalhados sem local fixo',
-        desc: 'Operadores perdem tempo procurando fita crepe e leitores de código de barras no início do turno.',
-        options: [
-          { val: 'Seiketsu', label: '4º S - Seiketsu (Senso de Padronização)' },
-          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização / Marcadores e Quadros)' },
-          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza)' },
-          { val: 'Seiri', label: '1º S - Seiri (Senso de Utilização)' }
-        ],
-        correct: 'Seiton'
-      },
-      {
-        id: '5s_3',
-        title: 'Cenário 3: Poeira acumulada e óleo derramado no corredor C',
-        desc: 'Sujeira no piso causando risco de derrapagem da empilhadeira e sujando os produtos.',
-        options: [
-          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza e Inspeção Preventiva)' },
-          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização)' },
-          { val: 'Shitsuke', label: '5º S - Shitsuke (Senso de Disciplina)' },
-          { val: 'Seiketsu', label: '4º S - Seiketsu (Senso de Padronização)' }
-        ],
-        correct: 'Seiso'
-      },
-      {
-        id: '5s_4',
-        title: 'Cenário 4: Falta de padrão nas etiquetas de identificação',
-        desc: 'Cada funcionário escreve o endereço da caixa à mão de um jeito diferente, gerando confusão.',
-        options: [
-          { val: 'Seiketsu', label: '4º S - Seiketsu (Senso de Padronização e Procedimentos POP)' },
-          { val: 'Seiri', label: '1º S - Seiri (Senso de Utilização)' },
-          { val: 'Seiso', label: '3º S - Seiso (Senso de Limpeza)' },
-          { val: 'Seiton', label: '2º S - Seiton (Senso de Organização)' }
-        ],
-        correct: 'Seiketsu'
+      } catch (e) {
+        console.error('Erro ao restaurar dados salvos', e);
       }
-    ];
-
-    function renderPhase3FiveS() {
-      const container = document.getElementById('fiveSContainer');
-      container.innerHTML = '';
-
-      fiveSData.forEach((scen) => {
-        const card = document.createElement('div');
-        card.className = 'bg-slate-900/70 p-4 rounded-xl border border-slate-800 space-y-3';
-
-        let optionsHTML = scen.options.map(opt => `
-          <label class="flex items-center gap-2.5 bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60 cursor-pointer hover:bg-slate-800 transition-colors">
-            <input 
-              type="radio" 
-              name="${scen.id}" 
-              value="${opt.val}" 
-              onchange="userAnswers.fiveS['${scen.id}'] = '${opt.val}'"
-              class="w-4 h-4 text-sky-500 bg-slate-900 border-slate-700 focus:ring-sky-500"
-            />
-            <span class="text-xs text-slate-200 font-medium">${opt.label}</span>
-          </label>
-        `).join('');
-
-        card.innerHTML = `
-          <div>
-            <h4 class="text-sm font-bold text-amber-400 flex items-center gap-2">
-              <i class="fa-solid fa-triangle-exclamation text-xs"></i> ${scen.title}
-            </h4>
-            <p class="text-xs text-slate-300 mt-1">${scen.desc}</p>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-            ${optionsHTML}
-          </div>
-        `;
-        container.appendChild(card);
-      });
     }
 
-    const actionStepsData = [
-      { id: 1, text: "Realizar Inventário Físico Inicial e Descarte de Obsoletos (Limpeza de Galpão)" },
-      { id: 2, text: "Classificar os produtos pela Curva ABC com base no Valor Financeiro Total" },
-      { id: 3, text: "Reorganizar o Endereçamento movendo os itens Classe A para perto da Expedição" },
-      { id: 4, text: "Treinar a Equipe na Metodologia 5S e implantar Auditoria Diária" }
-    ];
-
-    function renderPhase4ActionPlan() {
-      const container = document.getElementById('actionPlanContainer');
-      container.innerHTML = '';
-
-      userAnswers.actionPlanOrder.forEach((stepId, index) => {
-        const stepObj = actionStepsData.find(s => s.id === stepId);
-        
-        const card = document.createElement('div');
-        card.className = 'bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 flex items-center justify-between gap-3';
-        
-        card.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold text-xs flex items-center justify-center shrink-0">
-              ${index + 1}º
-            </span>
-            <span class="text-xs sm:text-sm font-medium text-slate-200">${stepObj.text}</span>
-          </div>
-
-          <div class="flex items-center gap-1 shrink-0">
-            <button 
-              onclick="moveActionStep(${index}, -1)" 
-              ${index === 0 ? 'disabled class="opacity-30 cursor-not-allowed px-2 py-1 bg-slate-800 rounded text-xs"' : 'class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded text-xs transition-colors"'}
-              title="Mover para cima"
-            >
-              <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button 
-              onclick="moveActionStep(${index}, 1)" 
-              ${index === 3 ? 'disabled class="opacity-30 cursor-not-allowed px-2 py-1 bg-slate-800 rounded text-xs"' : 'class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded text-xs transition-colors"'}
-              title="Mover para baixo"
-            >
-              <i class="fa-solid fa-arrow-down"></i>
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
+    function showSaveBadge() {
+      const badge = document.getElementById('saveBadge');
+      badge.classList.remove('hidden');
+      setTimeout(() => {
+        // keep badge visible
+      }, 1000);
     }
 
-    function moveActionStep(index, direction) {
-      const newIndex = index + direction;
-      if (newIndex < 0 || newIndex >= userAnswers.actionPlanOrder.length) return;
-
-      const temp = userAnswers.actionPlanOrder[index];
-      userAnswers.actionPlanOrder[index] = userAnswers.actionPlanOrder[newIndex];
-      userAnswers.actionPlanOrder[newIndex] = temp;
-
-      renderPhase4ActionPlan();
+    function confirmReset() {
+      if (confirm('Deseja realmente apagar todos os dados digitados e recomeçar a atividade?')) {
+        localStorage.removeItem('dt_logistica_data');
+        window.location.reload();
+      }
     }
 
-    function goToPhase(phaseNum) {
-      // Hide all phases
-      document.getElementById('phase1Section').classList.add('hidden');
-      document.getElementById('phase2Section').classList.add('hidden');
-      document.getElementById('phase3Section').classList.add('hidden');
-      document.getElementById('phase4Section').classList.add('hidden');
+    /* CASE SELECTION */
+    function selectCase(index) {
+      appData.selectedCaseIndex = index;
+      
+      // Update UI cards
+      for (let i = 0; i <= 5; i++) {
+        const btn = document.getElementById(`case-btn-${i}`);
+        if (btn) {
+          if (i === index) {
+            btn.classList.add('selected', 'border-logistics-600', 'bg-blue-50/80', 'ring-2', 'ring-logistics-500/30');
+            btn.classList.remove('border-slate-200', 'bg-slate-50');
+          } else {
+            btn.classList.remove('selected', 'border-logistics-600', 'bg-blue-50/80', 'ring-2', 'ring-logistics-500/30');
+            btn.classList.add('border-slate-200', 'bg-slate-50');
+          }
+        }
+      }
 
-      // Update Wizard Tabs
-      for (let i = 1; i <= 4; i++) {
-        const tab = document.getElementById(`wizardStep${i}`);
-        if (i === phaseNum) {
-          tab.className = 'py-2 rounded-lg bg-sky-500 text-white font-bold flex items-center justify-center gap-1.5 transition-all shadow-md';
-        } else if (i < phaseNum) {
-          tab.className = 'py-2 rounded-lg bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30 flex items-center justify-center gap-1.5 transition-all';
+      // Show custom box if case 0
+      const customBox = document.getElementById('customCaseBox');
+      if (index === 0) {
+        customBox.classList.remove('hidden');
+      } else {
+        customBox.classList.add('hidden');
+      }
+
+      saveData();
+      showToast('Caso selecionado com sucesso!');
+    }
+
+    /* PROBLEM STATEMENT BUILDER */
+    function updateProblemStatement() {
+      const prob = document.getElementById('defProblema').value.trim() || '[_____]';
+      const afeta = document.getElementById('defAfeta').value.trim() || '[_____]';
+      const gerando = document.getElementById('defGerando').value.trim() || '[_____]';
+      const situacao = document.getElementById('defSituacao').value.trim() || '[_____]';
+
+      const phrase = `"Nosso problema é ${prob}, porque afeta ${afeta}, gerando ${gerando}, na situação de ${situacao}."`;
+      document.getElementById('problemStatementPreview').innerText = phrase;
+      saveData();
+    }
+
+    /* PROTOTYPE TABS & LOGIC */
+    function switchProtoTab(tabName) {
+      if (!appData.prototipo) appData.prototipo = {};
+      appData.prototipo.activeTab = tabName;
+
+      // Tab buttons state
+      ['photo', 'steps', 'draw'].forEach(t => {
+        const btn = document.getElementById(`protoTabBtn-${t}`);
+        const content = document.getElementById(`protoTab-${t}`);
+        if (t === tabName) {
+          btn.classList.add('bg-white', 'shadow-sm', 'text-logistics-700');
+          btn.classList.remove('text-slate-600');
+          content.classList.remove('hidden');
         } else {
-          tab.className = 'py-2 rounded-lg bg-slate-800 text-slate-400 font-medium flex items-center justify-center gap-1.5 transition-all';
+          btn.classList.remove('bg-white', 'shadow-sm', 'text-logistics-700');
+          btn.classList.add('text-slate-600');
+          content.classList.add('hidden');
         }
+      });
+
+      if (tabName === 'draw') {
+        setTimeout(resizeCanvas, 100);
       }
 
-      const titles = {
-        1: "Fase 1: Curva ABC de Estoque",
-        2: "Fase 2: Endereçamento e Armazenagem",
-        3: "Fase 3: Metodologia 5S na Logística",
-        4: "Fase 4: Plano de Ação e Prioridades"
+      saveData();
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        appData.prototipo.photoDataUrl = dataUrl;
+        document.getElementById('protoPhotoPreview').src = dataUrl;
+        document.getElementById('protoPhotoPreviewContainer').classList.remove('hidden');
+        saveData();
+        showToast('Foto do protótipo anexada!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeProtoPhoto() {
+      appData.prototipo.photoDataUrl = '';
+      document.getElementById('protoPhotoPreview').src = '';
+      document.getElementById('protoPhotoPreviewContainer').classList.add('hidden');
+      document.getElementById('photoInput').value = '';
+      saveData();
+    }
+
+    /* PROTO STEPS LIST */
+    function renderProtoSteps() {
+      const list = document.getElementById('protoStepsList');
+      list.innerHTML = '';
+
+      if (!appData.prototipo.steps) appData.prototipo.steps = [];
+
+      appData.prototipo.steps.forEach((st, idx) => {
+        const div = document.createElement('div');
+        div.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 relative group";
+        div.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-logistics-700 bg-blue-100 px-2 py-0.5 rounded-md">Passo ${idx + 1}</span>
+            <button onclick="removeProtoStep(${idx})" class="text-xs text-rose-500 hover:text-rose-700">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <input type="text" value="${st.title || ''}" oninput="updateProtoStep(${idx}, 'title', this.value)" placeholder="Título do passo..."
+            class="w-full px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 outline-none">
+          <textarea rows="1" oninput="updateProtoStep(${idx}, 'desc', this.value)" placeholder="Descrição da ação ou mudança..."
+            class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 outline-none">${st.desc || ''}</textarea>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function addProtoStep() {
+      if (!appData.prototipo.steps) appData.prototipo.steps = [];
+      appData.prototipo.steps.push({ title: `Passo ${appData.prototipo.steps.length + 1}`, desc: '' });
+      renderProtoSteps();
+      saveData();
+    }
+
+    function updateProtoStep(index, field, val) {
+      if (appData.prototipo.steps[index]) {
+        appData.prototipo.steps[index][field] = val;
+        saveData();
+      }
+    }
+
+    function removeProtoStep(index) {
+      appData.prototipo.steps.splice(index, 1);
+      renderProtoSteps();
+      saveData();
+    }
+
+    /* CANVAS DRAWING LOGIC */
+    let canvas, ctx;
+    let isDrawing = false;
+    let canvasColor = '#1e293b';
+    let canvasTool = 'pen';
+
+    function initCanvas() {
+      canvas = document.getElementById('protoCanvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+
+      // Mouse events
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseleave', stopDraw);
+
+      // Touch events
+      canvas.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        startDraw({ clientX: touch.clientX, clientY: touch.clientY });
+      });
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        draw({ clientX: touch.clientX, clientY: touch.clientY });
+      });
+      canvas.addEventListener('touchend', stopDraw);
+
+      resizeCanvas();
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      if (rect.width > 0) {
+        // Save current contents
+        const temp = canvas.toDataURL();
+        canvas.width = rect.width;
+        canvas.height = 320;
+        
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Restore image if existing
+        if (appData.prototipo && appData.prototipo.canvasDataUrl) {
+          const img = new Image();
+          img.onload = () => ctx.drawImage(img, 0, 0);
+          img.src = appData.prototipo.canvasDataUrl;
+        }
+      }
+    }
+
+    function startDraw(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (canvasTool === 'pen') {
+        ctx.strokeStyle = canvasColor;
+        ctx.lineWidth = 3;
+      } else {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 18;
+      }
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+
+    function stopDraw() {
+      if (isDrawing) {
+        isDrawing = false;
+        ctx.closePath();
+        if (appData.prototipo) {
+          appData.prototipo.canvasDataUrl = canvas.toDataURL();
+          saveData();
+        }
+      }
+    }
+
+    function setCanvasColor(color) {
+      canvasColor = color;
+      canvasTool = 'pen';
+      updateCanvasToolButtons();
+    }
+
+    function setCanvasTool(tool) {
+      canvasTool = tool;
+      updateCanvasToolButtons();
+    }
+
+    function updateCanvasToolButtons() {
+      const penBtn = document.getElementById('toolPen');
+      const eraserBtn = document.getElementById('toolEraser');
+      if (canvasTool === 'pen') {
+        penBtn.className = "px-2.5 py-1.5 bg-white shadow-sm rounded-lg text-xs font-bold text-slate-800";
+        eraserBtn.className = "px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900";
+      } else {
+        eraserBtn.className = "px-2.5 py-1.5 bg-white shadow-sm rounded-lg text-xs font-bold text-slate-800";
+        penBtn.className = "px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900";
+      }
+    }
+
+    function clearCanvas() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (appData.prototipo) {
+        appData.prototipo.canvasDataUrl = '';
+        saveData();
+      }
+      showToast('Desenho limpo!');
+    }
+
+    /* PITCH DASHBOARD RENDERING */
+    function renderDashboard() {
+      document.getElementById('dashTurma').innerText = `Turma / Módulo: ${appData.turma || 'Não informada'}`;
+      document.getElementById('dashIntegrantes').innerText = `Integrantes: ${appData.integrantes || 'Não informados'}`;
+
+      // Desafio
+      let caseText = 'Não selecionado';
+      if (appData.selectedCaseIndex === 0) {
+        caseText = `Próprio: ${appData.customCase || 'Não detalhado'}`;
+      } else if (appData.selectedCaseIndex && casesList[appData.selectedCaseIndex]) {
+        caseText = casesList[appData.selectedCaseIndex].title;
+      }
+      document.getElementById('dashDesafio').innerText = caseText;
+
+      // Usuário
+      document.getElementById('dashUsuario').innerText = appData.empatia.quem || 'Não definido';
+
+      // Frase
+      const prob = appData.definicao.problema || '...';
+      const afeta = appData.definicao.afeta || '...';
+      const gerando = appData.definicao.gerando || '...';
+      const situacao = appData.definicao.situacao || '...';
+      document.getElementById('dashProblemaFrase').innerText = `"Nosso problema é ${prob}, porque afeta ${afeta}, gerando ${gerando}, na situação de ${situacao}."`;
+
+      // Solução
+      const solNum = appData.ideacao.escolhida;
+      const solNome = solNum ? (appData.ideacao[`s${solNum}`] || `Solução ${solNum}`) : 'Nenhuma selecionada';
+      document.getElementById('dashSolucaoNome').innerText = `Solução Escolhida: ${solNome}`;
+      document.getElementById('dashSolucaoJustificativa').innerText = appData.ideacao.justificativa || 'Sem justificativa preenchida.';
+
+      // Protótipo view
+      const protoView = document.getElementById('dashProtoView');
+      protoView.innerHTML = '';
+
+      if (appData.prototipo.photoDataUrl) {
+        protoView.innerHTML = `
+          <div class="space-y-1">
+            <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">📷 Foto do Desenho no Papel:</span>
+            <img src="${appData.prototipo.photoDataUrl}" class="max-h-48 rounded-xl border border-slate-300 mx-auto mt-2">
+          </div>
+        `;
+      } else if (appData.prototipo.steps && appData.prototipo.steps.length > 0) {
+        let stepsHtml = '<ol class="list-decimal list-inside space-y-1 text-slate-700 font-medium">';
+        appData.prototipo.steps.forEach(st => {
+          stepsHtml += `<li><strong>${st.title || 'Passo'}:</strong> ${st.desc || ''}</li>`;
+        });
+        stepsHtml += '</ol>';
+        protoView.innerHTML = stepsHtml;
+      } else if (appData.prototipo.canvasDataUrl) {
+        protoView.innerHTML = `
+          <div class="space-y-1">
+            <span class="text-[11px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">✏️ Desenho Digital:</span>
+            <img src="${appData.prototipo.canvasDataUrl}" class="max-h-48 rounded-xl border border-slate-300 mx-auto mt-2 bg-white">
+          </div>
+        `;
+      } else {
+        protoView.innerHTML = `<p class="text-slate-400 italic">Nenhum protótipo registrado ainda.</p>`;
+      }
+
+      // Teste e KPIs
+      document.getElementById('dashTestePlano').innerText = appData.teste.plano || 'Sem plano de teste definido.';
+      
+      const kpisContainer = document.getElementById('dashKpisList');
+      kpisContainer.innerHTML = '';
+      
+      const kpiNames = {
+        1: "⏱️ Lead Time",
+        2: "🎯 Acuracidade",
+        3: "🚚 OTIF",
+        4: "📍 Rota",
+        5: "💔 Avarias"
       };
 
-      document.getElementById('phaseTitle').innerText = titles[phaseNum];
-      document.getElementById('progressPercent').innerText = `${phaseNum * 25}%`;
-
-      // Show target phase
-      document.getElementById(`phase${phaseNum}Section`).classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function validatePhase1() {
-      // Check if all items answered
-      const keys = Object.keys(userAnswers.abc);
-      if (keys.length < generatedItems.length || Object.values(userAnswers.abc).some(v => !v)) {
-        showToast('Por favor, selecione a Classe (A, B ou C) para TODOS os produtos da tabela.', 'error');
-        return;
+      if (appData.teste.kpis) {
+        Object.keys(appData.teste.kpis).forEach(k => {
+          const item = appData.teste.kpis[k];
+          if (item && item.checked) {
+            const badge = document.createElement('span');
+            badge.className = "bg-logistics-100 text-logistics-800 text-[11px] font-bold px-2 py-1 rounded-md border border-logistics-200";
+            badge.innerText = `${kpiNames[k]} (${item.target || 'Sem meta'})`;
+            kpisContainer.appendChild(badge);
+          }
+        });
       }
-
-      // Calculate score for Phase 1
-      let correctCount = 0;
-      generatedItems.forEach(item => {
-        if (userAnswers.abc[item.id] === item.correctClass) {
-          correctCount++;
-        }
-      });
-
-      phaseScores.p1 = (correctCount / generatedItems.length) * 10;
-      goToPhase(2);
-      showToast('Fase 1 concluída! Agora enderece os produtos.', 'success');
     }
 
-    function validatePhase2() {
-      const keys = Object.keys(userAnswers.addressing);
-      if (keys.length < generatedItems.length || Object.values(userAnswers.addressing).some(v => !v)) {
-        showToast('Por favor, selecione a Zona de Armazenagem para TODOS os produtos.', 'error');
-        return;
-      }
+    /* PITCH TIMER LOGIC */
+    let timerInterval = null;
+    let timerSeconds = 180; // 3 minutes
+    let isTimerRunning = false;
 
-      let correctCount = 0;
-      generatedItems.forEach(item => {
-        if (userAnswers.addressing[item.id] === item.correctZone) {
-          correctCount++;
-        }
-      });
-
-      phaseScores.p2 = (correctCount / generatedItems.length) * 10;
-      goToPhase(3);
-      showToast('Fase 2 concluída! Responda às perguntas do 5S.', 'success');
-    }
-
-    function validatePhase3() {
-      const answered = Object.keys(userAnswers.fiveS).length;
-      if (answered < fiveSData.length) {
-        showToast('Por favor, responda a todos os cenários do 5S.', 'error');
-        return;
-      }
-
-      let correctCount = 0;
-      fiveSData.forEach(scen => {
-        if (userAnswers.fiveS[scen.id] === scen.correct) {
-          correctCount++;
-        }
-      });
-
-      phaseScores.p3 = (correctCount / fiveSData.length) * 10;
-      goToPhase(4);
-      showToast('Fase 3 concluída! Ordene o Plano de Ação.', 'success');
-    }
-
-    function finalizeGame() {
-      // Check Phase 4 score
-      const correctOrder = [1, 2, 3, 4];
-      let matchCount = 0;
-      userAnswers.actionPlanOrder.forEach((val, idx) => {
-        if (val === correctOrder[idx]) matchCount++;
-      });
-
-      phaseScores.p4 = (matchCount / 4) * 10;
-
-      // Final Grade Calculation (Weighted or Average)
-      const finalScoreNum = (phaseScores.p1 * 0.35) + (phaseScores.p2 * 0.35) + (phaseScores.p3 * 0.15) + (phaseScores.p4 * 0.15);
-      const finalGradeFormatted = finalScoreNum.toFixed(1).replace('.', ',');
-
-      // Render Final Screen
-      document.getElementById('phase1Section').classList.add('hidden');
-      document.getElementById('phase2Section').classList.add('hidden');
-      document.getElementById('phase3Section').classList.add('hidden');
-      document.getElementById('phase4Section').classList.add('hidden');
-      document.getElementById('wizardStep4').className = 'py-2 rounded-lg bg-emerald-500 text-white font-bold flex items-center justify-center gap-1.5 shadow-md';
-      document.getElementById('progressPercent').innerText = '100%';
-
-      // Set Certificate Info
-      document.getElementById('finalStudentName').innerText = studentData.name;
-      document.getElementById('finalStudentDob').innerText = studentData.dob;
-      document.getElementById('finalAuthHash').innerText = studentData.hashStr;
-      
-      const now = new Date();
-      document.getElementById('finalTimestamp').innerText = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
-
-      document.getElementById('finalGrade').innerText = finalGradeFormatted;
-
-      // Dynamic KPIs and Status Text
-      const statusEl = document.getElementById('finalStatusText');
-      if (finalScoreNum >= 9.0) {
-        statusEl.innerText = 'Aprovado com Louvor (Gestor Sênior)';
-        statusEl.className = 'text-[11px] font-semibold text-emerald-400 mt-1';
-        document.getElementById('kpiAccuracy').innerText = '99,8%';
-        document.getElementById('kpiPicking').innerText = '-42%';
-        document.getElementById('kpiOtif').innerText = '99,8%';
-      } else if (finalScoreNum >= 7.0) {
-        statusEl.innerText = 'Aprovado (Gestor Operacional)';
-        statusEl.className = 'text-[11px] font-semibold text-sky-400 mt-1';
-        document.getElementById('kpiAccuracy').innerText = '95,2%';
-        document.getElementById('kpiPicking').innerText = '-28%';
-        document.getElementById('kpiOtif').innerText = '96,5%';
+    function toggleTimer() {
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        document.getElementById('timerToggleBtn').innerHTML = `<i class="fa-solid fa-play"></i> Continuar`;
       } else {
-        statusEl.innerText = 'Atenção Necessária (Revisar Conceitos)';
-        statusEl.className = 'text-[11px] font-semibold text-amber-400 mt-1';
-        document.getElementById('kpiAccuracy').innerText = '82,0%';
-        document.getElementById('kpiPicking').innerText = '-10%';
-        document.getElementById('kpiOtif').innerText = '88,0%';
+        isTimerRunning = true;
+        document.getElementById('timerToggleBtn').innerHTML = `<i class="fa-solid fa-pause"></i> Pausar`;
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            playBeepSound();
+            showToast('⏰ Tempo do Pitch encerrado!');
+            document.getElementById('timerToggleBtn').innerHTML = `<i class="fa-solid fa-rotate-left"></i> Recomeçar`;
+          }
+        }, 1000);
       }
-
-      // Render Phase Breakdown
-      const breakdownEl = document.getElementById('phaseBreakdown');
-      breakdownEl.innerHTML = `
-        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
-          <span class="text-slate-300">1. Curva ABC (Pareto)</span>
-          <strong class="${phaseScores.p1 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p1.toFixed(1).replace('.', ',')} / 10</strong>
-        </div>
-        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
-          <span class="text-slate-300">2. Endereçamento e Armazenagem</span>
-          <strong class="${phaseScores.p2 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p2.toFixed(1).replace('.', ',')} / 10</strong>
-        </div>
-        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
-          <span class="text-slate-300">3. Metodologia 5S Logística</span>
-          <strong class="${phaseScores.p3 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p3.toFixed(1).replace('.', ',')} / 10</strong>
-        </div>
-        <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60 flex items-center justify-between">
-          <span class="text-slate-300">4. Plano de Ação Logístico</span>
-          <strong class="${phaseScores.p4 >= 7 ? 'text-emerald-400' : 'text-amber-400'} font-bold">${phaseScores.p4.toFixed(1).replace('.', ',')} / 10</strong>
-        </div>
-      `;
-
-      // Feedback Text
-      const feedbackEl = document.getElementById('feedbackBox');
-      if (finalScoreNum >= 8.5) {
-        feedbackEl.innerHTML = `<p><strong class="text-emerald-400">Excelente desempenho!</strong> Você demonstrou domínio completo dos conceitos de Curva ABC, posicionamento estratégico no galpão, organização de ambiente de trabalho com 5S e estruturação de plano de ação. Seu galpão resgatado opera com alta eficiência!</p>`;
-      } else {
-        feedbackEl.innerHTML = `<p><strong class="text-amber-400">Bom trabalho!</strong> Você concluiu o desafio logístico. Lembre-se sempre de priorizar a localização dos itens Classe A perto da expedição para economizar tempo nas rotas internas do galpão.</p>`;
-      }
-
-      document.getElementById('finalResultsSection').classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      showToast('Desafio concluído com sucesso! Confira seu relatório.', 'success');
     }
 
-    function copyWhatsAppSummary() {
-      const finalGrade = document.getElementById('finalGrade').innerText;
-      const textToCopy = `*COMPROVANTE DE DESAFIO LOGÍSTICO - CEBRAC*\n` +
-        `📦 *Operação Resgate de Estoque*\n\n` +
-        `👤 *Aluno:* ${studentData.name}\n` +
-        `📅 *Nascimento:* ${studentData.dob}\n` +
-        `🎯 *Nota Final:* ${finalGrade} / 10,0\n` +
-        `🔑 *Código Autenticidade:* ${studentData.hashStr}\n\n` +
-        `📊 *Desempenho por Etapa:*\n` +
-        `• Curva ABC: ${phaseScores.p1.toFixed(1).replace('.', ',')}/10\n` +
-        `• Endereçamento: ${phaseScores.p2.toFixed(1).replace('.', ',')}/10\n` +
-        `• Diagnóstico 5S: ${phaseScores.p3.toFixed(1).replace('.', ',')}/10\n` +
-        `• Plano de Ação: ${phaseScores.p4.toFixed(1).replace('.', ',')}/10\n\n` +
-        `Status: Desafio Concluído.`;
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerSeconds = 180;
+      updateTimerDisplay();
+      document.getElementById('timerToggleBtn').innerHTML = `<i class="fa-solid fa-play"></i> Iniciar`;
+    }
 
-      // Copy fallback to clipboard
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = textToCopy;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+      const s = (timerSeconds % 60).toString().padStart(2, '0');
+      document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+    }
+
+    function playBeepSound() {
       try {
-        document.execCommand('copy');
-        showToast('Resumo copiado com sucesso! Cole na conversa com o professor.', 'success');
-      } catch (err) {
-        showToast('Erro ao copiar automaticamente. Tente selecionar o texto.', 'error');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.2);
+      } catch (e) {
+        console.log('Audio Context not allowed');
       }
-      
-      document.body.removeChild(tempTextArea);
     }
 
-    function resetGame() {
-      if (confirm('Deseja refazer a atividade do início?')) {
-        location.reload();
+    /* WHATSAPP EXPORT */
+    function sendToWhatsApp() {
+      const turma = appData.turma || 'Não informada';
+      const integrantes = appData.integrantes || 'Não informados';
+      
+      let caseText = 'Não selecionado';
+      if (appData.selectedCaseIndex === 0) {
+        caseText = `Próprio: ${appData.customCase || 'Não detalhado'}`;
+      } else if (appData.selectedCaseIndex && casesList[appData.selectedCaseIndex]) {
+        caseText = casesList[appData.selectedCaseIndex].title;
       }
+
+      const prob = appData.definicao.problema || '...';
+      const afeta = appData.definicao.afeta || '...';
+      const gerando = appData.definicao.gerando || '...';
+      const situacao = appData.definicao.situacao || '...';
+
+      const solNum = appData.ideacao.escolhida;
+      const solNome = solNum ? (appData.ideacao[`s${solNum}`] || `Solução ${solNum}`) : 'Nenhuma selecionada';
+      const justificativa = appData.ideacao.justificativa || 'Sem justificativa.';
+
+      let text = `🚚 *DESAFIO DESIGN THINKING NA LOGÍSTICA*\n\n`;
+      text += `📋 *Turma/Módulo:* ${turma}\n`;
+      text += `👥 *Integrantes:* ${integrantes}\n\n`;
+      text += `1️⃣ *Desafio Escolhido:* ${caseText}\n`;
+      text += `2️⃣ *Usuário Afetado:* ${appData.empatia.quem || 'Não informado'}\n`;
+      text += `3️⃣ *Frase do Problema:* "Nosso problema é ${prob}, porque afeta ${afeta}, gerando ${gerando}, na situação de ${situacao}."\n\n`;
+      text += `4️⃣ *Solução Escolhida:* ${solNome}\n`;
+      text += `💡 *Por que é a melhor:* ${justificativa}\n\n`;
+      text += `5️⃣ *Plano de Teste:* ${appData.teste.plano || 'Não detalhado'}\n`;
+      text += `📈 *Atividade concluída via App DT Logística.*`;
+
+      const encoded = encodeURIComponent(text);
+      window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+    }
+
+    /* TOAST UTILITY */
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2500);
     }
   </script>
 </body>
